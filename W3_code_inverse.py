@@ -23,7 +23,6 @@ class population:
         for individual in self.container:
             self.__fitness += individual.fitness
 
-
 class individual_candidate:
     def __init__(self, geneLength):
         self.__genes = list()
@@ -199,18 +198,19 @@ def mutation(newOffsprings, mutationRate):
 
 def best_generation_individual(currentPopulation):
     best = 0
-    bestIndividual = None
+    bestIndividualIndex = None
     
-    for individual in currentPopulation:
-        if individual.fitness > best:
-            best = individual.fitness
-            bestIndividual = individual
+    for individual in range (0, len(currentPopulation)):
+        if currentPopulation[individual].fitness > best:
+            best = currentPopulation[individual].fitness
+            bestIndividualIndex = individual
 
-    return bestIndividual
+    return bestIndividualIndex
 
 def worst_generation_individual(currentPopulation):
     worst = -1
     indexOfWorstIndividual = 0
+    worstIndividual = None
     
     for individual in range (0, len(currentPopulation)):
         if individual == 0:
@@ -222,7 +222,7 @@ def worst_generation_individual(currentPopulation):
             worstIndividual = currentPopulation[individual]
             indexOfWorstIndividual = individual
 
-    return indexOfWorstIndividual
+    return worstIndividual
 
 def crossover_and_mutation(matingPool, genesLength, mutationRate):
     "Defintion: Returns selected population object (new) with crossover and mutation "
@@ -249,12 +249,11 @@ def crossover_and_mutation(matingPool, genesLength, mutationRate):
             offSpringPopulation.crossOverPoint.append(crossOverPoint)
 
             newChildren = cross_over(crossOverPoint, parentA, parentB)
-
             newChildren = mutation(newChildren, mutationRate)
 
             chA = newChildren['childA']
             chB = newChildren['childB']
-
+            
             chA.individuals_fitness()
             chB.individuals_fitness()
 
@@ -263,13 +262,6 @@ def crossover_and_mutation(matingPool, genesLength, mutationRate):
 
             offSpringPopulation.container.append(chA)
             offSpringPopulation.container.append(chB)
-
-        # offSpringPopulation.work_out_population_fitness()
-
-    popfitness = offSpringPopulation.fitness
-    # print("fitness of new population: {0}".format(popfitness))
-    # print("\nNew population selected and being returned:\n")
-    # population_DNA_printer(offSpringPopulation.container)
 
     return offSpringPopulation
 
@@ -281,7 +273,7 @@ def tournmanetSelection(populationContainer, geneLength):
         parentA = populationContainer[randA]
         parentB = populationContainer[randB]
 
-        if(parentA.fitness > parentB.fitness):
+        if(parentA.fitness < parentB.fitness):
             selectedParents.append(parentA)
         else:
             selectedParents.append(parentB)
@@ -316,24 +308,24 @@ def generations_run(generations, currentPopulation, genesLength, mutationRate):
 
         populationAverageFitness = (currentPopulation.fitness / currentPopulation.size)
 
-        bestIndividual = best_generation_individual(currentPopulation.container) #// once selecction and reproduction 
+        worstIndividual = worst_generation_individual(currentPopulation.container) #// once selecction and reproduction 
 
-        helpful_print(generation, newPopulation, currentPopulation)
+        # helpful_print(generation, newPopulation, currentPopulation)
 
-        if newPopulation.fitness > currentPopulation.fitness:
+        if newPopulation.fitness < currentPopulation.fitness:
 
             currentPopulation = newPopulation # Can check here for best overall before copying over
 
-        worstIndividualIndex = worst_generation_individual(currentPopulation.container)
+        bestIndividualIndex = best_generation_individual(currentPopulation.container)
 
         # print("worstIndex: {0}\t| bestIndividual: {1}".format(worstIndividualIndex, bestIndividual.fitness))
 
-        currentPopulation.container[worstIndividualIndex] = bestIndividual
+        currentPopulation.container[bestIndividualIndex] = worstIndividual
 
         # copy local best ind over current pop worst 
 
         yPlotPopulationFitnessAverage.append(populationAverageFitness)
-        yPlotBestindividual.append(bestIndividual.fitness)
+        yPlotBestindividual.append(worstIndividual.fitness)
         print(yPlotBestindividual)
         xGenerations.append(generation)
 
