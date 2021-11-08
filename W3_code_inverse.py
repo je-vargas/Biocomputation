@@ -1,6 +1,7 @@
 import random
 import matplotlib.pyplot as plt
 import numpy as np
+import math as math
 # ------------------------- CLASS
 
 class population:
@@ -54,15 +55,28 @@ class individual_candidate:
         self.__relativeFitnessAsPercentage = round(relativeFitness)
         # print("indidivual's relative fitness: {relativeFitness} ".format(fitness = self.__fitness, relativeFitness = self.__relativeFitnessAsPercentage))
 
-    def individuals_fitness(self):
+    def individuals_fitness(self, cosSine = False):
         self.__fitness = 0
-        for gene in self.genes:
-            self.__fitness += gene
+        fixedSum = 0
+        fitness = 0
 
+        if cosSine:
+            for i in range(0, self.__genesLength):
+                fixedSum = 10*self.__genesLength
+                fitness +=  (pow(i, 2) - (10*math.cos((2*math.pi*i))))
+            self.__fitness = fixedSum + fitness
+        else: 
+            for gene in self.genes:
+                self.__fitness += gene
+    
     def create_dna(self):
         for x in range(0, self.__genesLength):
             # random no between 0-1 because GeneticAlgorithm is using a Binary Encoding
             self.__genes.append(random.uniform(0.0, 1.0))
+    
+    def create_dna(self, geneRangeStart, geneRangeFinish):
+        for x in range(0, self.__genesLength):
+            self.__genes.append(random.uniform(geneRangeStart, geneRangeFinish))
 
 # ------------------------- METHODS
 
@@ -86,13 +100,13 @@ def generations_comparison_DNA_printer(newPopulation, oldPopulation):
         newPopulation.container[individual].genes, newPopulation.crossOverPoint[individual]))
     print("\t\t\t| old pop fitness: {0}\t| new pop fitness: {1}".format(oldPopulation.fitness, newPopulation.fitness))
 
-def create_individuals(geneLength, populationSize):
+def create_individuals(geneLength, geneRangeStart, geneRangeFinish ,populationSize):
     # Creating random population of size P
     population = []
     for individual in range(0, populationSize):
         newindividual = individual_candidate(geneLength)
-        newindividual.create_dna()
-        newindividual.individuals_fitness()
+        newindividual.create_dna(geneRangeStart, geneRangeFinish)
+        newindividual.individuals_fitness(True)
         population.append(newindividual)
     return population
 
@@ -339,14 +353,14 @@ def generations_run(generations, currentPopulation, genesLength, mutationRate):
 
 # ---------------------------- MAIN -----------> 
 GenesLen = 50
-P = 50
+P = 100
 
 # ----------- Initiation ------------
 startingPopulation = population(P)
-startingPopulation.container = create_individuals(GenesLen, startingPopulation.size)
+startingPopulation.container = create_individuals(GenesLen, -5.12, 5.12, startingPopulation.size)
 
 # ----------- GA Running ------------
-gn = generations_run(50, startingPopulation, GenesLen, 0.7)
+gn = generations_run(50, startingPopulation, GenesLen, 0.25)
 
 # ----------- Graph Plotting ------------
 plt.xlabel('generations')
