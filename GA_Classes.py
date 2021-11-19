@@ -6,9 +6,8 @@ class population:
         self.averagefitness = 0
         self.crossOverPoint = list()
 
-class individual_candidate:
+class candidate:
     def __init__(self):
         self.genes = list()
         self.fitness = 0
         self.relativeFitnessAsPercentage = 0
-
