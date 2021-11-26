@@ -1,22 +1,34 @@
+CGREEN2  = '\33[92m'
+CYELLOW2 = '\33[93m'
+CBLUE2   = '\33[94m'
+
 """
 Available Methods:
-    - DNA_bit_printer(list)
-    - population_DNA_printer(list)
+    - print_candidate_gene(list)
+    - print_pop_candidate_gene(list)
     - generations_comparison_DNA_printer(list(popContainer), list(popContainer))
     - helpful_print()
 """
 
-
-def DNA_bit_printer(individual):
+def print_candidate_gene(individual):
+    '''
+    Def: prints genes of candidates
+    '''
     for bit in individual.genes:
         print(bit)
 
-def population_DNA_printer(populationArray):
-    for individual in populationArray:
-        print("genes: {0}".format(individual.genes))
+def print_pop_container(populationContainer):
+    '''
+    Def: prints candidates attributes
+    '''
+    for individual in populationContainer:
+        # print("genes: {0}".format(individual.genes))
+        print(f"{individual}")
 
 def generations_comparison_DNA_printer(newPopulation, oldPopulation):
-    "Definition: prints new and old population for comparison"
+    '''
+    Def: prints new and old population for comparison"
+    '''
     for individual in range(0, len(newPopulation.container)):
         print("popIndex: {0} | old pop: {1} | new pop: {2} | cross over: {3}".format(individual, oldPopulation.container[individual].genes, 
         newPopulation.container[individual].genes, newPopulation.crossOverPoint[individual]))

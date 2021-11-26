@@ -294,16 +294,16 @@ def generations_run(generations, currentPopulation, genesLength, mutationRate):
     currentPopulation.work_out_population_fitness() 
 
     for generation in range(0, generations):
+        #
+            # print("Generation: {0}\n".format(generation))
+            # population_DNA_printer(currentPopulation.container)
 
-        # print("Generation: {0}\n".format(generation))
-        # population_DNA_printer(currentPopulation.container)
+            # ------- !!! not using mating pool for W2 !!!! --------
+                # for currentIndividual in currentPopulation.container:
+                #     currentIndividual.set_relative_fitness(currentPopulation.fitness)
+                #     print(str(currentIndividual.relative_fitness))
 
-        # ------- !!! not using mating pool for W2 !!!! --------
-            # for currentIndividual in currentPopulation.container:
-            #     currentIndividual.set_relative_fitness(currentPopulation.fitness)
-            #     print(str(currentIndividual.relative_fitness))
-
-            # selectection -> for worksheet 2 is just selecting 2 parents down list and crossing over and adding mutation
+                # selectection -> for worksheet 2 is just selecting 2 parents down list and crossing over and adding mutation
         
         tournmanetSelect = tournmanetSelection(currentPopulation.container, genesLength)
 
@@ -314,30 +314,12 @@ def generations_run(generations, currentPopulation, genesLength, mutationRate):
         populationAverageFitness = (currentPopulation.fitness / currentPopulation.size)
 
         bestIndividual = best_generation_individual(currentPopulation.container) #// once selecction and reproduction 
-        
-        # 
-            # print("\nNew population after Crss & Mut\n")
-            # population_DNA_printer(newPopulation.container)
-            # print("\n")
-            # population_DNA_printer(newPopulation.container)
 
-        # print("generation: {0}\n".format(generation))
-        # generations_comparison_DNA_printer(newPopulation, currentPopulation)
-        # print("\n")
-
-        # print("new pop fitness : {0}\t| current pop fitess: {1}\n".format(newPopulation.fitness, currentPopulation.fitness))
-
-        # local variable of best individual from currnt pop
-        # if newPopulation.fitness > currentPopulation.fitness:
         currentPopulation = newPopulation
 
         worstIndividualIndex = worst_generation_individual(currentPopulation.container)
 
-        # print("worstIndex: {0}\t| bestIndividual: {1}".format(worstIndividualIndex, bestIndividual.fitness))
-
         currentPopulation.container[worstIndividualIndex] = bestIndividual
-
-        # copy local best ind over current pop worst 
 
         yPlotPopulationFitnessAverage.append(populationAverageFitness)
         yPlotBestindividual.append(bestIndividual.fitness)

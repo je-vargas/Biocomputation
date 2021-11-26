@@ -1,3 +1,5 @@
+import Printing_Methods as prt
+
 class population:
     '''
         properties: 
@@ -14,14 +16,20 @@ class population:
         self.averagefitness = 0
         self.crossOverPoint = list()
 
-class candidate:
+    def __str__ (self):
+        return f"Population:\n{prt.print_pop_container(self.container)}\nFitness: {self.fitness}\tSize: {self.size}"
+
+class individual:
     '''
         properties: 
-            - genes
+            - gene
             - fitness
             - relativeFitness
     '''
     def __init__(self):
-        self.genes = list()
+        self.gene = list()
         self.fitness = 0
         self.relativeFitness = 0
+
+    def __str__ (self):
+        return f"Genes:\n{self.gene}\nFitness: {self.fitness}\t| RelativeFitness: {self.relativeFitness}\n"
