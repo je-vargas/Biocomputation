@@ -27,7 +27,7 @@ class individual:
             - relativeFitness
     '''
     def __init__(self):
-        self.gene = list()
+        self.gene = []
         self.fitness = 0
         self.relativeFitness = 0
 

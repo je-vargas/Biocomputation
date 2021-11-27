@@ -23,9 +23,24 @@ def mutation(offspring, mutation):
                 else:
                     gene = 1
             newind.gene.append(gene)
+        newind.fitness = ga.candidate_fitness_binarySum(newind.gene)
         offspring[i] = copy.deepcopy(newind)
-        offspring[i].fitness = ga.candidate_fitness_binarySum(offspring[i].gene)
+        
     return offspring
+
+    def mutation_floats():
+        for i in range(0, P):
+            for j in range(0, N):
+                if rand() < MUTRATE :
+                    alter = random.uniform(GMIN, GMAX)
+                    if random.randint(0, 1) :
+                        offspring[i].gene[j] = copy.deepcopy(offspring[i].gene[j]+alter);
+                        if offspring[i].gene[j] > GMAX: offspring[i].gene[j] = 1.0;
+                    else :
+                        offspring[i].gene[j] = offspring[i].gene[j]-alter;
+                        if offspring[i].gene[j] < GMIN : offspring[i].gene[j] = 0.0;
+
+
 
 def mutation_on_binary(xssOffsprigs , mutationRate):
     mutatedOffspring = list()

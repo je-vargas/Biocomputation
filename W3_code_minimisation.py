@@ -169,7 +169,7 @@ def survivor_selection_maximatation(offspringsList, currentPopContainer):
 # ------------------ initiation ------------------
 def init_pop(N, P):
     currentPop = gaClass.population()
-    # currentPop.container = gaMethods.create_population_realNumbers(N, GENEMIN, GENEMAX, P)
+    currentPop.container = gaMethods.create_population_realNumbers(N, GENEMIN, GENEMAX, P)
     currentPop.container = gaMethods.create_population_binary(N, P)
     currentPop.fitness = ga.population_fitness(currentPop.container)
     return currentPop

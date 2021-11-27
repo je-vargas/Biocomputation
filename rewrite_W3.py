@@ -7,11 +7,15 @@ import random
 import copy
 
 
-P = 50
-N = 50
+P = 6
+N = 10
 MUTATION = 0.15
 # MUTATION = 0.02
 # MUTATION = 0
+# GMIN = -5.12
+# GMAX = 5.12
+GMIN = 0.0
+GMAX = 1.0
 
 population = []
 offspring = []
@@ -23,13 +27,13 @@ plotBest = []
 for x in range (0, P):
     tempgene=[]
     for y in range (0, N):
-        tempgene.append(random.randint(0,1))
+        tempgene.append(random.uniform(GMIN, GMAX))
     newind = ga.individual()
     newind.gene = copy.deepcopy(tempgene)
     newind.fitness = fit.candidate_fitness_binarySum(newind.gene)
     population.append(newind)
 
-for generations in range(0, 50):
+for generations in range(0, 20):
 
     # --- SELECTION made to offspring array
     for i in range (0, P):
@@ -37,6 +41,7 @@ for generations in range(0, 50):
         off1 = copy.deepcopy(population[parent1])
         parent2 = random.randint( 0, P-1 )
         off2 = copy.deepcopy(population[parent2])
+
         if off1.fitness > off2.fitness:
             offspring.append( off1 )
         else:
@@ -60,7 +65,23 @@ for generations in range(0, 50):
         offspring[i+1] = copy.deepcopy(tempoff2)
     
     # --- MUTATION
-    offspring = copy.deepcopy(methods.mutation(offspring, MUTATION))
+    for i in range(0, P):
+        newind = ga.individual()
+        for j in range(0, N):
+            gene = offspring[i].gene[j]
+            mutprob = random.random()
+            if mutprob < MUTATION :
+                alter = random.uniform(GMIN, GMAX)
+                if random.randint(0, 1) :
+                    gene = gene + alter
+                    if gene > GMAX: gene = GMAX
+                else :
+                    gene = gene - alter
+                    if gene < GMIN : gene = GMIN
+            newind.gene.append(gene)
+        newind.fitness = fit.candidate_fitness_binarySum(newind.gene)
+        offspring[i] = copy.deepcopy(newind)
+
 
     # --- SORT POPULATION / OFFSPRING --> AND PERSIST BEST INDIVIDUAL
     population.sort(key=lambda ind: ind.fitness, reverse = True)
@@ -97,8 +118,8 @@ for generations in range(0, 50):
     popFitness.clear()
 
 # ---------- Plot ----------
-print(plotBest)
-print(f"popMean: \n{plotPopulationMean}")
+# print(plotBest)
+# print(f"popMean: \n{plotPopulationMean}")
 
 
 plt.xlabel('generations')
