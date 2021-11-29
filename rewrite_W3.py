@@ -1,39 +1,62 @@
-import GA_Classes as ga
-import GA_Methods as methods
-import GA_GenesAndFitness as fit
-import Printing_Methods as hlp
+from Other import GA_Classes as ga
+from Other import GA_GenesAndFitness as fit
+from Other import Printing_Methods as hlp
 import matplotlib.pyplot as plt
+import Methods as m
+import numpy as np
 import random
 import copy
 
 
-P = 1000
-N = 10
+P = 10
+N = 6
 # MUTATIONSTEP = 1.0
 # MUTATION = 0.15
 # MUTATION = 0.02
-MUTATION = 0.5
-# MUTATION = 0.0
+# MUTATION = 0.5
+MUTATION = 0.0
 GMIN = -5.12
 GMAX = 5.12
 # GMIN = 0.0
 # GMAX = 1.0
 
 population = []
-offspring = []
+# offspring = []
 
 plotPopulationMean = []
 plotBest = []
 
+def candidate_fitness_cosFunc(population):
+
+    fitness = 10 * N
+    for i in range (N):
+        fitness += (gene[i] ** 2 - 10 * np.cos(2*np.pi*gene[i]))
+    return population
+
+# def candidate_fitness_cosFunc(gene):
+#     fitness = 10 * N
+#     for i in range (N):
+#         fitness += (gene[i] ** 2 - 10 * np.cos(2*np.pi*gene[i]))
+#     return fitness
+
+# def candidate_fitness_cosFunc(gene):
+#     fitness = 10 * N
+#     for i in range (N):
+#         fitness += (gene[i] ** 2 - 10 * np.cos(2*np.pi*gene[i]))
+#     return fitness
+
 # start population
-for x in range (0, P):
-    tempgene=[]
-    for y in range (0, N):
-        tempgene.append(random.uniform(GMIN, GMAX))
-    newind = ga.individual()
-    newind.gene = copy.deepcopy(tempgene)
-    newind.fitness = fit.candidate_fitness_cosFunc(newind.gene) #TODO UPDATE DEPENDING ON FITNESS FUNCT USED -> line 82
-    population.append(newind)
+    # for x in range (0, P):
+    #     tempgene=[]
+    #     for y in range (0, N):
+    #         tempgene.append(random.uniform(GMIN, GMAX))
+    #     newind = ga.individual()
+    #     newind.gene = copy.deepcopy(tempgene)
+    #     newind.fitness = candidate_fitness_cosFunc(newind.gene) #TODO UPDATE DEPENDING ON FITNESS FUNCT USED -> line 82
+    #     population.append(newind)
+
+population = m.seed_pop()
+
 
 for generations in range(0, 30):
 
@@ -103,6 +126,7 @@ for generations in range(0, 30):
 
     offFitness = sum(offspringFit)
     popFitness = sum(populationFit)
+    print(f"offFitness: {offFitness}\tpopFitness: {popFitness}")
     
     offspringFit.clear()
     populationFit.clear()

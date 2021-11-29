@@ -1,4 +1,4 @@
-import Printing_Methods as prt
+# import Printing_Methods as prt
 
 class population:
     '''

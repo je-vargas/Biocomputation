@@ -1,5 +1,4 @@
 from typing import Union, List
-import GA_Classes as gaClass
 import numpy as np
 import random
 
