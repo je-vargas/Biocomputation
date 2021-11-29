@@ -204,7 +204,7 @@ def iterate(population):
             fitness.append(individual.fitness)
         min_fitness = min(fitness)
 
-        #best_fitness.append(best_population_fitness(population))
+        # best_fitness.append(best_population_fitness(population))
         mean_fitness = (sum(fitness) / P)
 
         best_fitness.append(min_fitness)

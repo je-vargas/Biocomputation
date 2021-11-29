@@ -7,15 +7,17 @@ import random
 import copy
 
 
-P = 6
+P = 1000
 N = 10
-MUTATION = 0.15
+# MUTATIONSTEP = 1.0
+# MUTATION = 0.15
 # MUTATION = 0.02
-# MUTATION = 0
-# GMIN = -5.12
-# GMAX = 5.12
-GMIN = 0.0
-GMAX = 1.0
+MUTATION = 0.5
+# MUTATION = 0.0
+GMIN = -5.12
+GMAX = 5.12
+# GMIN = 0.0
+# GMAX = 1.0
 
 population = []
 offspring = []
@@ -30,10 +32,10 @@ for x in range (0, P):
         tempgene.append(random.uniform(GMIN, GMAX))
     newind = ga.individual()
     newind.gene = copy.deepcopy(tempgene)
-    newind.fitness = fit.candidate_fitness_binarySum(newind.gene)
+    newind.fitness = fit.candidate_fitness_cosFunc(newind.gene) #TODO UPDATE DEPENDING ON FITNESS FUNCT USED -> line 82
     population.append(newind)
 
-for generations in range(0, 20):
+for generations in range(0, 30):
 
     # --- SELECTION made to offspring array
     for i in range (0, P):
@@ -42,7 +44,7 @@ for generations in range(0, 20):
         parent2 = random.randint( 0, P-1 )
         off2 = copy.deepcopy(population[parent2])
 
-        if off1.fitness > off2.fitness:
+        if off1.fitness < off2.fitness: #! FOR MAXIMATATION CHANGE TO >
             offspring.append( off1 )
         else:
             offspring.append( off2 )
@@ -79,17 +81,17 @@ for generations in range(0, 20):
                     gene = gene - alter
                     if gene < GMIN : gene = GMIN
             newind.gene.append(gene)
-        newind.fitness = fit.candidate_fitness_binarySum(newind.gene)
+        newind.fitness = fit.candidate_fitness_cosFunc(newind.gene) #TODO UPDATE DEPENDING ON FITNESS FUNCT USED
         offspring[i] = copy.deepcopy(newind)
 
 
     # --- SORT POPULATION / OFFSPRING --> AND PERSIST BEST INDIVIDUAL
     population.sort(key=lambda ind: ind.fitness, reverse = True)
-    popBest = population[0]
+    popBest = population[-1] #! MAXIMATATION = 0, MINIMATATION = -1
 
     newPopulation = copy.deepcopy(offspring)
     newPopulation.sort(key=lambda ind: ind.fitness)
-    newPopulation[0] = popBest
+    newPopulation[-1] = popBest #! MAXIMATATION = 0, MINIMASATION = -1
     offspring.clear()
 
     # ----- COPY  OFFSPRING over to POPULATION ----- 
@@ -101,16 +103,22 @@ for generations in range(0, 20):
 
     offFitness = sum(offspringFit)
     popFitness = sum(populationFit)
+    
+    offspringFit.clear()
+    populationFit.clear()
 
-    if offFitness > popFitness:
-        population = copy.deepcopy(newPopulation)
+    # if offFitness < popFitness: #! Only copy over offspring if it's better than population
+    #     #TODO --> FOR MAXIMATATION >, MINIMASATION <  !We want less fittest pop
+    #     population = copy.deepcopy(newPopulation)
+
+    population = copy.deepcopy(newPopulation)
 
     # --- BEST-FITNESS / MEAN FITNESS
     popFitness = []
     for ind in population:
         popFitness.append(ind.fitness)
 
-    best = max(popFitness)
+    best = min(popFitness) #TODO: UPDATE HERE FOR MAXIMATATION = max(), MINIMATATION = min() 
     popMean = (sum(popFitness)/P)
     plotBest.append(best)
     plotPopulationMean.append(popMean)
@@ -119,13 +127,13 @@ for generations in range(0, 20):
 
 # ---------- Plot ----------
 # print(plotBest)
-# print(f"popMean: \n{plotPopulationMean}")
+print(f"popMean: \n{plotPopulationMean}")
 
 
 plt.xlabel('generations')
 plt.ylabel('fitness')
 plt.plot(plotPopulationMean, label = "popAverage")
 plt.plot(plotBest, label = "bestIndividual")
-plt.legend(loc="lower right")
+plt.legend(loc="upper right")
 plt.show()
 

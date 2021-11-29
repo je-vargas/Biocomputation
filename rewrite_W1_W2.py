@@ -7,17 +7,19 @@ import random
 import copy
 
 
-P = 6
+P = 100
 N = 50
 # MUTATION = 0.15
-MUTATION = 0.02
-# MUTATION = 0
+# MUTATION = 0.02
+MUTATION = 0
 
 population = []
 offspring = []
 
 plotPopulationMean = []
 plotBest = []
+
+
 
 # start population
 for x in range (0, P):
@@ -81,8 +83,9 @@ for generations in range(0, 50):
     offFitness = sum(offspringFit)
     popFitness = sum(populationFit)
 
-    if offFitness > popFitness:
-        population = copy.deepcopy(newPopulation)
+    # if offFitness > popFitness:
+    #     population = copy.deepcopy(newPopulation)
+    population = copy.deepcopy(newPopulation)
 
     # --- BEST-FITNESS / MEAN FITNESS
     popFitness = []
