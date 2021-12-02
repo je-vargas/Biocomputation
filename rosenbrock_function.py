@@ -12,9 +12,9 @@ class individual:
     def __str__ (self):
         return f"Genes:\n{self.gene}\nFitness: {self.fitness}\t| RelativeFitness: {self.relativeFitness}\n"
 
-P = 300
+P = 100
 N = 20
-G = 1000
+G = 100
 # MUTATIONSTEP = 1.0
 # MUTATION = 0.15
 # MUTATION = 0.02
@@ -23,22 +23,12 @@ G = 1000
 MUTATION = 0.02
 # GMIN = -5.12
 # GMAX = 5.12
-# GMIN = 100
-# GMAX = -100
-GMIN = -32
-GMAX = 32
+GMIN = 100
+GMAX = -100
+# GMIN = -32
+# GMAX = 32
 
 # --------- FITNESS FUNCTIONS
-def rastrigin_fitness_function(population):
-    '''worksheet3'''
-    for i in range(0, len(population)):
-        
-        fitness = 10 * N
-        for j in range (N):
-            fitness += (population[i].gene[j] ** 2 - 10 * np.cos(2*np.pi*population[i].gene[j]))
-        
-        population[i].fitness = copy.deepcopy(fitness)
-    return population
 
 def rosenbrock_fitness_function(population):
     '''assignment function 1'''
@@ -46,21 +36,6 @@ def rosenbrock_fitness_function(population):
         fitness = 0
         for j in range(N-1):
             fitness += 100*(population[i].gene[j+1]-(population[i].gene[j]**2))**2+((1-population[i].gene[j])**2)
-    
-        population[i].fitness = copy.deepcopy(fitness)
-    return population
-
-def ackleys_fitness_function(population):
-    '''might be ackleys function'''
-
-    for i in range(0, len(population)):
-        fitness = 0
-        firstSum = 0
-        secondSum = 0
-        for j in range(N):
-            firstSum += population[i].gene[j]**2
-            secondSum = np.cos(2*np.pi*population[i].gene[j])
-            fitness += -20.0*np.exp((-0.2*np.sqrt(firstSum/N)) - np.exp(secondSum/N))
     
         population[i].fitness = copy.deepcopy(fitness)
     return population
