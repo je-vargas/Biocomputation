@@ -12,27 +12,25 @@ class individual:
     def __str__ (self):
         return f"Genes:\n{self.gene}\nFitness: {self.fitness}\t| RelativeFitness: {self.relativeFitness}\n"
 
-P = 2000
-# P = 200 #chinesGuy
+P = 200 #600
 N = 20
 G = 200
 # G = 1000 #chinesGuy
 
 # CrossOver Rate ? might be useful to
-
-# MUTATION = 0.05
-MUTATION = 0.00275
-
+GMIN = 100
+GMAX = -100
+STEP = 10
+MUTATION = 0.0015
+# MUTATION = 0.00275
 # MUTATION = 0.0015
 # MUTATION = 0.02
-# MUTATION = 0.0025
+# MUTATION = 0.0010
 # MUTATION = 0.00275
 # MUTATION = 0.0025 #^
 # MUTATION = 0.0010 #^
 # MUTATION = 0.0040 # ^
-GMIN = 100
-GMAX = -100
-STEP = 1.0
+
 
 # --------- FITNESS FUNCTIONS
 
@@ -155,15 +153,23 @@ def run(population):
 
     # ---------- Plot ----------
 
-population = seed_pop()
-population = copy.deepcopy(rosenbrock_fitness_function(population))
-popBest, popMean = run(population)
+run_5_best = [] 
+for i in range(5):
+    population = seed_pop()
+    population = copy.deepcopy(rosenbrock_fitness_function(population))
+    popBest, popMean = run(population)
+    population.clear()
 
-print(popBest)
+    print(f"{popBest}\n")
+    run_5_best.append(popBest)
 
 plt.xlabel('generations')
 plt.ylabel('fitness')
-plt.plot(popMean, label = "popAverage")
-plt.plot(popBest, label = "bestIndividual")
+# plt.plot(popMean, label = "popAverage")
+plt.plot(run_5_best[0], label = "bestIndividual_r1")
+plt.plot(run_5_best[1], label = "bestIndividual_r2")
+plt.plot(run_5_best[2], label = "bestIndividual_r3")
+plt.plot(run_5_best[3], label = "bestIndividual_r4")
+plt.plot(run_5_best[4], label = "bestIndividual_r5")
 plt.legend(loc="upper right")
 plt.show()
