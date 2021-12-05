@@ -12,21 +12,22 @@ class individual:
     def __str__ (self):
         return f"Genes:\n{self.gene}\nFitness: {self.fitness}\t| RelativeFitness: {self.relativeFitness}\n"
 
-P = 300
+P = 1500
 N = 20
-G = 1000
+G = 60
 # MUTATIONSTEP = 1.0
 # MUTATION = 0.15
 # MUTATION = 0.02
 # MUTATION = 0.5
 # MUTATION = 0.01
-MUTATION = 0.02
+MUTATION = 0.00275
 # GMIN = -5.12
 # GMAX = 5.12
 # GMIN = 100
 # GMAX = -100
 GMIN = -32
 GMAX = 32
+STEP = 4
 
 # --------- FITNESS FUNCTIONS
 def rastrigin_fitness_function(population):
@@ -120,7 +121,7 @@ def mutation(offspring):
             gene = offspring[i].gene[j]
             mutprob = random.random()
             if mutprob < MUTATION :
-                alter = random.uniform(-50, 50)
+                alter = random.uniform(0, STEP)
                 # print(f"gene alter by: {alter}\n")
                 if random.randint(0, 1) :
                     gene = gene + alter
@@ -153,8 +154,8 @@ def run(population):
         offspring = selection(population)
         off_combined = recombination(offspring)
         off_mutation = mutation(off_combined)
-        off_mutation = copy.deepcopy(rosenbrock_fitness_function(off_mutation))
-        # off_mutation = copy.deepcopy(ackleys_fitness_function(off_mutation))
+        # off_mutation = copy.deepcopy(rosenbrock_fitness_function(off_mutation))
+        off_mutation = copy.deepcopy(ackleys_fitness_function(off_mutation))
         population = utility(population, off_mutation)
         
         offspring.clear()
@@ -176,8 +177,8 @@ def run(population):
     # ---------- Plot ----------
 
 population = seed_pop()
-population = copy.deepcopy(rosenbrock_fitness_function(population))
-# population = copy.deepcopy(ackleys_fitness_function(population))
+# population = copy.deepcopy(rosenbrock_fitness_function(population))
+population = copy.deepcopy(ackleys_fitness_function(population))
 popBest, popMean = run(population)
 
 plt.xlabel('generations')

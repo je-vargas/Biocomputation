@@ -12,21 +12,27 @@ class individual:
     def __str__ (self):
         return f"Genes:\n{self.gene}\nFitness: {self.fitness}\t| RelativeFitness: {self.relativeFitness}\n"
 
-P = 100
+P = 2000
+# P = 200 #chinesGuy
 N = 20
-G = 100
-# MUTATIONSTEP = 1.0
-# MUTATION = 0.15
+G = 200
+# G = 1000 #chinesGuy
+
+# CrossOver Rate ? might be useful to
+
+# MUTATION = 0.05
+MUTATION = 0.00275
+
+# MUTATION = 0.0015
 # MUTATION = 0.02
-# MUTATION = 0.5
-# MUTATION = 0.01
-MUTATION = 0.02
-# GMIN = -5.12
-# GMAX = 5.12
+# MUTATION = 0.0025
+# MUTATION = 0.00275
+# MUTATION = 0.0025 #^
+# MUTATION = 0.0010 #^
+# MUTATION = 0.0040 # ^
 GMIN = 100
 GMAX = -100
-# GMIN = -32
-# GMAX = 32
+STEP = 1.0
 
 # --------- FITNESS FUNCTIONS
 
@@ -35,7 +41,8 @@ def rosenbrock_fitness_function(population):
     for i in range(0, len(population)):
         fitness = 0
         for j in range(N-1):
-            fitness += 100*(population[i].gene[j+1]-(population[i].gene[j]**2))**2+((1-population[i].gene[j])**2)
+            fitness += 100 * pow(population[i].gene[j + 1] - population[i].gene[j] ** 2, 2) + pow(1 - population[i].gene[j], 2)
+
     
         population[i].fitness = copy.deepcopy(fitness)
     return population
@@ -95,8 +102,7 @@ def mutation(offspring):
             gene = offspring[i].gene[j]
             mutprob = random.random()
             if mutprob < MUTATION :
-                alter = random.uniform(-50, 50)
-                # print(f"gene alter by: {alter}\n")
+                alter = random.uniform(0, STEP)
                 if random.randint(0, 1) :
                     gene = gene + alter
                     if gene > GMAX: gene = GMAX
@@ -129,7 +135,6 @@ def run(population):
         off_combined = recombination(offspring)
         off_mutation = mutation(off_combined)
         off_mutation = copy.deepcopy(rosenbrock_fitness_function(off_mutation))
-        # off_mutation = copy.deepcopy(ackleys_fitness_function(off_mutation))
         population = utility(population, off_mutation)
         
         offspring.clear()
@@ -152,8 +157,9 @@ def run(population):
 
 population = seed_pop()
 population = copy.deepcopy(rosenbrock_fitness_function(population))
-# population = copy.deepcopy(ackleys_fitness_function(population))
 popBest, popMean = run(population)
+
+print(popBest)
 
 plt.xlabel('generations')
 plt.ylabel('fitness')
