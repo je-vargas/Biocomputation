@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-import random
+import random          
 import copy
 
 class individual:
@@ -12,16 +12,19 @@ class individual:
     def __str__ (self):
         return f"Genes:\n{self.gene}\nFitness: {self.fitness}\t| RelativeFitness: {self.relativeFitness}\n"
 
-P = 200 #600
+P = 400 #200 #600
 N = 20
-G = 200
+G = 120
 # G = 1000 #chinesGuy
 
 # CrossOver Rate ? might be useful to
 GMIN = 100
 GMAX = -100
-STEP = 10
-MUTATION = 0.0015
+STEP = 15
+# LOW_MUTATION = 0.0015
+# HIGH_MUTATION = 0.003
+LOW_MUTATION = 0.00275
+HIGH_MUTATION = 0.004
 # MUTATION = 0.00275
 # MUTATION = 0.0015
 # MUTATION = 0.02
@@ -93,24 +96,52 @@ def recombination(offspring):
     return offspring
 
 def mutation(offspring):
+    gene = []
+    #!don't need offspringFitness as this is list woth all fitness
+    offspringFitness, meanFitness = population_fitness(offspring) 
+    
     # --- MUTATION
     for i in range(0, P):
         newind = individual()
         for j in range(0, N):
-            gene = offspring[i].gene[j]
-            mutprob = random.random()
-            if mutprob < MUTATION :
-                alter = random.uniform(0, STEP)
-                if random.randint(0, 1) :
-                    gene = gene + alter
-                    if gene > GMAX: gene = GMAX
-                else :
-                    gene = gene - alter
-                    if gene < GMIN : gene = GMIN
-            newind.gene.append(gene)
-        # newind.fitness = fit.rastrigin_fitness_function(newind.gene) #TODO UPDATE DEPENDING ON FITNESS FUNCT USED
+            gene.append(offspring[i].gene[j])
+
+        if offspring[i].fitness > meanFitness:
+            gene = copy.deepcopy(high_mutation(gene))
+        else:
+            gene = copy.deepcopy(low_mutation(gene))
+            
+        newind.gene = copy.deepcopy(gene)
+        gene.clear()
         offspring[i] = copy.deepcopy(newind)
+
     return offspring
+
+def high_mutation(gene):
+    for i in range(len(gene)): 
+        mutprob = random.random()
+        if mutprob < HIGH_MUTATION :
+            alter = random.uniform(0, STEP)
+            if random.randint(0, 1) :
+                gene[i] = gene[i] + alter
+                if gene[i] > GMAX: gene[i] = GMAX
+            else :
+                gene[i] = gene[i] - alter
+                if gene[i] < GMIN : gene[i] = GMIN
+    return gene
+
+def low_mutation(gene):
+    for i in range(len(gene)): 
+        mutprob = random.random()
+        if mutprob < LOW_MUTATION :
+            alter = random.uniform(0, STEP)
+            if random.randint(0, 1) :
+                gene[i] = gene[i] + alter
+                if gene[i] > GMAX: gene[i] = GMAX
+            else :
+                gene[i] = gene[i] - alter
+                if gene[i] < GMIN : gene[i] = GMIN
+    return gene
 
 def utility(population, offspring):
     # --- SORT POPULATION / OFFSPRING --> AND PERSIST BEST INDIVIDUAL
@@ -122,6 +153,14 @@ def utility(population, offspring):
     newPopulation[-1] = popBest #! MAXIMATATION = 0, MINIMASATION = -1
     
     return newPopulation
+
+def population_fitness(population):
+    pop_fitness = []
+    for ind in population:
+        pop_fitness.append(ind.fitness)
+    meanFitness = (sum(pop_fitness) / P)
+    return pop_fitness, meanFitness
+    
 
 def run(population):
     plotPopulationMean = []
@@ -137,31 +176,31 @@ def run(population):
         
         offspring.clear()
 
-        pop_fitness = []
-        for ind in population:
-            pop_fitness.append(ind.fitness)
+        pop_fitness, meanFitness = copy.deepcopy(population_fitness(population))
         minFitness = min(pop_fitness)
-        meanFitness = (sum(pop_fitness) / P)
+        
 
         plotBest.append(minFitness)
         plotPopulationMean.append(meanFitness)
     
     return plotBest, plotPopulationMean
 
-    
-
-
     # ---------- Plot ----------
 
 run_5_best = [] 
-for i in range(5):
+run_5_mean = []
+for i in range(10):
     population = seed_pop()
     population = copy.deepcopy(rosenbrock_fitness_function(population))
     popBest, popMean = run(population)
     population.clear()
 
-    print(f"{popBest}\n")
+    run_5_mean.append(popBest[-1])
+    print(f"{popBest[-1]}\n")
     run_5_best.append(popBest)
+
+average = sum(run_5_mean)/10
+print(f"AVERAGE : {average}")
 
 plt.xlabel('generations')
 plt.ylabel('fitness')
@@ -171,5 +210,10 @@ plt.plot(run_5_best[1], label = "bestIndividual_r2")
 plt.plot(run_5_best[2], label = "bestIndividual_r3")
 plt.plot(run_5_best[3], label = "bestIndividual_r4")
 plt.plot(run_5_best[4], label = "bestIndividual_r5")
+plt.plot(run_5_best[5], label = "bestIndividual_r1")
+plt.plot(run_5_best[6], label = "bestIndividual_r2")
+plt.plot(run_5_best[7], label = "bestIndividual_r3")
+plt.plot(run_5_best[8], label = "bestIndividual_r4")
+plt.plot(run_5_best[9], label = "bestIndividual_r5")
 plt.legend(loc="upper right")
 plt.show()
