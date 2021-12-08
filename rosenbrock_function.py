@@ -14,7 +14,7 @@ class individual:
 
 P = 200 #600
 N = 20
-G = 200
+G = 150
 # G = 1000 #chinesGuy
 
 # CrossOver Rate ? might be useful to
@@ -34,6 +34,13 @@ MUTATION = 0.0015
 
 # --------- FITNESS FUNCTIONS
 
+def rosenbrock_seeding_fitness(gene):
+    fitness = 0
+    for j in range(N-1):
+        fitness += 100 * pow(gene[j + 1] - gene[j] ** 2, 2) + pow(1 - gene[j], 2)
+    return fitness
+    
+
 def rosenbrock_fitness_function(population):
     '''assignment function 1'''
     for i in range(0, len(population)):
@@ -41,7 +48,6 @@ def rosenbrock_fitness_function(population):
         for j in range(N-1):
             fitness += 100 * pow(population[i].gene[j + 1] - population[i].gene[j] ** 2, 2) + pow(1 - population[i].gene[j], 2)
 
-    
         population[i].fitness = copy.deepcopy(fitness)
     return population
 
@@ -54,7 +60,7 @@ def seed_pop():
             tempgene.append(random.uniform(GMIN, GMAX))
         newind = individual()
         newind.gene = copy.deepcopy(tempgene)
-        # newind.fitness = fit.rastrigin_fitness_function(newind.gene) #TODO UPDATE DEPENDING ON FITNESS FUNCT USED -> line 82
+        newind.fitness = copy.deepcopy(rosenbrock_seeding_fitness(newind.gene)) #TODO UPDATE DEPENDING ON FITNESS FUNCT USED -> line 82
         population.append(newind)
     return population
 
@@ -92,15 +98,15 @@ def recombination(offspring):
         offspring[i+1] = copy.deepcopy(tempoff2)
     return offspring
 
-def mutation(offspring):
+def mutation(offspring, mut, step):
     # --- MUTATION
     for i in range(0, P):
         newind = individual()
         for j in range(0, N):
             gene = offspring[i].gene[j]
             mutprob = random.random()
-            if mutprob < MUTATION :
-                alter = random.uniform(0, STEP)
+            if mutprob < mut :
+                alter = random.uniform(0, step)
                 if random.randint(0, 1) :
                     gene = gene + alter
                     if gene > GMAX: gene = GMAX
@@ -123,7 +129,7 @@ def utility(population, offspring):
     
     return newPopulation
 
-def run(population):
+def run(population, mut, step):
     plotPopulationMean = []
     plotBest = []
 
@@ -131,7 +137,7 @@ def run(population):
 
         offspring = selection(population)
         off_combined = recombination(offspring)
-        off_mutation = mutation(off_combined)
+        off_mutation = mutation(off_combined, mut, step)
         off_mutation = copy.deepcopy(rosenbrock_fitness_function(off_mutation))
         population = utility(population, off_mutation)
         
@@ -148,21 +154,34 @@ def run(population):
     
     return plotBest, plotPopulationMean
 
-    
-
-
     # ---------- Plot ----------
 
-run_5_best = [] 
-for i in range(5):
-    population = seed_pop()
-    population = copy.deepcopy(rosenbrock_fitness_function(population))
-    popBest, popMean = run(population)
-    population.clear()
+table_range = [
+    [0.003, 0.005, 0.0010, 0.0015, 0.0020, 0.0025, 0.00275, 0.003],
+    [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+]
 
-    print(f"{popBest}\n")
-    run_5_best.append(popBest)
+for mut in range(0, len(table_range[0])):
+    print("!! ------------- MUT CHANGE ------------- !!\n")
+    for step in range(0, len(table_range[1])):
 
+        # run_10_plot = []
+        table_mean = []
+        
+        for i in range(10):
+
+            popBest, popMean = run(seed_pop(), table_range[0][mut], table_range[1][step])
+
+            print(f"{popBest[-6:]}")
+
+            table_mean.append(popBest[-1])
+            # run_10_plot.append(popBest)
+            
+        average = sum(table_mean)/10
+        table_mean.clear()
+        print("RUN USING: \t|MUT: {0} \t|STEP: {1}".format(table_range[0][mut], table_range[1][step]))
+        print(f"AVERAGE: {average}\n")
+        
 plt.xlabel('generations')
 plt.ylabel('fitness')
 # plt.plot(popMean, label = "popAverage")
