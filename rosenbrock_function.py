@@ -21,6 +21,7 @@ G = 150
 GMIN = 100
 GMAX = -100
 STEP = 10
+ARITHMETIC_STEP = 0.4
 MUTATION = 0.0015
 # MUTATION = 0.00275
 # MUTATION = 0.0015
@@ -98,6 +99,31 @@ def recombination(offspring):
         offspring[i+1] = copy.deepcopy(tempoff2)
     return offspring
 
+def arithmetic_recombination(offspring):
+    # --- ARITHMETIC RECOMBINATION  (crossover)
+    # --- Remember alpha of 0.5 will prouce twins 
+    # Child1 = α.x + (1-α).y
+    # Child2 = α.x + (1-α).y
+
+    tempoff1 = individual()
+    tempoff2 = individual()
+    temp = individual()
+    for i in range( 0, P, 2 ):
+        tempoff1 = copy.deepcopy(offspring[i])
+        tempoff2 = copy.deepcopy(offspring[i+1])
+        temp = copy.deepcopy(offspring[i])
+
+        crossprob = random.random() #! use to control how often genes get crossed
+        #TODO implement crossover probability
+
+        for j in range (0, N):
+            tempoff1.gene[j] = ARITHMETIC_STEP * tempoff1.gene[j] + (1-ARITHMETIC_STEP) * tempoff2[j]
+            tempoff2.gene[j] = ARITHMETIC_STEP * tempoff2.gene[j] + (1-ARITHMETIC_STEP) * tempoff1[j]
+
+        offspring[i] = copy.deepcopy(tempoff1)
+        offspring[i+1] = copy.deepcopy(tempoff2)
+    return offspring
+
 def mutation(offspring, mut, step):
     # --- MUTATION
     for i in range(0, P):
@@ -156,39 +182,59 @@ def run(population, mut, step):
 
     # ---------- Plot ----------
 
-table_range = [
-    [0.003, 0.005, 0.0010, 0.0015, 0.0020, 0.0025, 0.00275, 0.003],
-    [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
-]
+# table_range = [
+#     [0.003, 0.005, 0.0010, 0.0015, 0.0020, 0.0025, 0.00275, 0.003],
+#     [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+# ]
 
-for mut in range(0, len(table_range[0])):
-    print("!! ------------- MUT CHANGE ------------- !!\n")
-    for step in range(0, len(table_range[1])):
-
-        # run_10_plot = []
-        table_mean = []
+# for mut in range(0, len(table_range[0])):
+#     print("!! ------------- MUT CHANGE ------------- !!\n")
+#     for step in range(0, len(table_range[1])):
         
-        for i in range(10):
+        # indent to here to generate table
 
-            popBest, popMean = run(seed_pop(), table_range[0][mut], table_range[1][step])
+iteration_plot_best_individual = []
+iteration_plot_popMean = []
+iteration_average = []
 
-            print(f"{popBest[-6:]}")
+for i in range(10):
 
-            table_mean.append(popBest[-1])
-            # run_10_plot.append(popBest)
-            
-        average = sum(table_mean)/10
-        table_mean.clear()
-        print("RUN USING: \t|MUT: {0} \t|STEP: {1}".format(table_range[0][mut], table_range[1][step]))
-        print(f"AVERAGE: {average}\n")
+    # popBest, popMean = run(seed_pop(), table_range[0][mut], table_range[1][step])
+    popBest, popMean = run(seed_pop(),MUTATION,STEP)
+
+    print(f"{popBest[-6:]}")
+
+    iteration_plot_best_individual.append(popBest)
+    iteration_plot_popMean.append(popMean)
+    iteration_average.append(popBest[-1])
+    
+_10_iteration_best_ind_average = sum(iteration_average)/10
+iteration_average.clear()
+
+popMean_sum = []
+for bestMean in iteration_plot_popMean:
+    popMean_sum.append(sum(bestMean))
+best_popMean  = min(popMean_sum)
+_10_iteration_lowest_popMean_index = popMean_sum.index(best_popMean)
+# print("RUN USING: \t|MUT: {0} \t|STEP: {1}".format(table_range[0][mut], table_range[1][step]))
+print(f"10 runs using same parameters\nAVERAGE: {_10_iteration_best_ind_average}\n")
+
+
+
+# ------------ PLOTTING CODE
         
 plt.xlabel('generations')
 plt.ylabel('fitness')
-# plt.plot(popMean, label = "popAverage")
-plt.plot(run_5_best[0], label = "bestIndividual_r1")
-plt.plot(run_5_best[1], label = "bestIndividual_r2")
-plt.plot(run_5_best[2], label = "bestIndividual_r3")
-plt.plot(run_5_best[3], label = "bestIndividual_r4")
-plt.plot(run_5_best[4], label = "bestIndividual_r5")
+plt.plot(iteration_plot_popMean[_10_iteration_lowest_popMean_index], label = "BEAST ITERATION AVERAGE")
+plt.plot(iteration_plot_best_individual[0], label = "bestIndividual_r1")
+plt.plot(iteration_plot_best_individual[1], label = "bestIndividual_r2")
+plt.plot(iteration_plot_best_individual[2], label = "bestIndividual_r3")
+plt.plot(iteration_plot_best_individual[3], label = "bestIndividual_r4")
+plt.plot(iteration_plot_best_individual[4], label = "bestIndividual_r5")
+plt.plot(iteration_plot_best_individual[5], label = "bestIndividual_r1")
+plt.plot(iteration_plot_best_individual[6], label = "bestIndividual_r2")
+plt.plot(iteration_plot_best_individual[7], label = "bestIndividual_r3")
+plt.plot(iteration_plot_best_individual[8], label = "bestIndividual_r4")
+plt.plot(iteration_plot_best_individual[9], label = "bestIndividual_r5")
 plt.legend(loc="upper right")
 plt.show()
