@@ -144,6 +144,81 @@ def mutation(offspring, mut, step):
         offspring[i] = copy.deepcopy(newind)
     return offspring
 
+def gaussian_mutation(offspring):
+    for i in range(P):
+        newind = individual()
+        for j in range(0, N):
+            gene = offspring[i].gene[j]
+            mutprob = random.random()
+            if mutprob < mut :
+                ui = ui(gene)
+                step = mut_step()
+                gene = gene + np.sqrt(2) * STEP * (GMAX-(-GMIN)) * sp.erfcinv(ui)
+            newind.gene.append(gene)
+        offspring[i] = copy.deepcopy(newind)
+    return offspring
+
+def mut_step():
+    return MUTATION/(GMAX-(-GMIN))
+
+def ui(gene):
+    ui = random.random()
+    if ui >= 0.5: 
+        ul = ul_or_ur(gene, "UL")
+        return 2 * ul * (1 - 2*ui)
+    else:
+        ur = ul_or_ur(gene, "UR")
+        return 2 * ur * (2*ui - 1)
+
+    raise Exception("No U'i was returned - Something's gone wrong during mutation")
+
+
+def ul_or_ur(gene, U):
+    if U == "UL":  return  0.5*(sp.erf((-GMIN-gene)/(np.sqrt(2)*(GMAX-(-GMIN)*STEP))) + 1)
+    elif U == "UR": return 0.5*(sp.erf((GMAX-gene)/(np.sqrt(2)*(GMAX-(-GMIN)*STEP))) + 1)
+    else: raise Exception("UL / UR was not calculated - Something's gone wrong during mutation")
+
+
+
+def normal_dist(x , mean , sd):
+    prob_density = (np.pi*sd) * np.exp(-0.5*((x-mean)/sd)**2)
+    return prob_density
+
+def gaussian_mutation(offspring, mut, step):
+    offspring_fitness = []
+    mean = 0
+    sdeviation = 0
+
+    for ft in range(P):
+        offspring_fitness.append(offspring[ft].fitness)
+        
+    mean = np.mean(offspring_fitness)
+    sdeviation = np.std(offspring_fitness)
+
+    # norm_dist = normal_dist(offspring_fitness, mean, sdeviation)
+    # plt.plot(offspring_fitness, norm_dist , color = 'red')
+    # plt.xlabel('Data points')   
+    # plt.ylabel('Probability Density')
+
+    # --- MUTATION
+    for i in range(0, P):
+        newind = individual()
+        for j in range(0, N):
+            gene = offspring[i].gene[j]
+            mutprob = random.random()
+            if mutprob < mut :
+
+                alter = random.uniform(0, step)
+                if random.randint(0, 1) :
+                    gene = gene + alter
+                    if gene > GMAX: gene = GMAX
+                else :
+                    gene = gene - alter
+                    if gene < GMIN : gene = GMIN
+            newind.gene.append(gene)
+        offspring[i] = copy.deepcopy(newind)
+    return offspring
+
 def utility(population, offspring):
     # --- SORT POPULATION / OFFSPRING --> AND PERSIST BEST INDIVIDUAL
     population.sort(key=lambda ind: ind.fitness, reverse = True)
@@ -163,7 +238,8 @@ def run(population, mut, step):
 
         offspring = selection(population)
         off_combined = recombination(offspring)
-        off_mutation = mutation(off_combined, mut, step)
+        off_mutation = gaussian_mutation(off_combined, mut, step)
+        return
         off_mutation = copy.deepcopy(rosenbrock_fitness_function(off_mutation))
         population = utility(population, off_mutation)
         
@@ -193,6 +269,11 @@ def run(population, mut, step):
         
         # indent to here to generate table
 
+
+
+popBest, popMean = run(seed_pop(),MUTATION,STEP)
+exit()
+
 iteration_plot_best_individual = []
 iteration_plot_popMean = []
 iteration_average = []
@@ -201,7 +282,6 @@ for i in range(10):
 
     # popBest, popMean = run(seed_pop(), table_range[0][mut], table_range[1][step])
     popBest, popMean = run(seed_pop(),MUTATION,STEP)
-
     print(f"{popBest[-6:]}")
 
     iteration_plot_best_individual.append(popBest)
