@@ -1,7 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import statistics
 import random
 import copy
+import math
 
 class individual:
     def __init__(self):
@@ -14,15 +16,17 @@ class individual:
 
 P = 200 #600
 N = 20
-G = 150
+G = 200
 # G = 1000 #chinesGuy
 
-# CrossOver Rate ? might be useful to
-GMIN = 100
-GMAX = -100
-STEP = 10
-ARITHMETIC_STEP = 0.4
-MUTATION = 0.0015
+CROSSOVER = 1
+GMIN = -100
+GMAX = 100
+STEP = 30
+RECOM_STEP = 0.5
+# MUTATION = 0.0015
+MUTATION = 0.01
+# MUTATION = 0.00275
 # MUTATION = 0.00275
 # MUTATION = 0.0015
 # MUTATION = 0.02
@@ -61,7 +65,7 @@ def seed_pop():
             tempgene.append(random.uniform(GMIN, GMAX))
         newind = individual()
         newind.gene = copy.deepcopy(tempgene)
-        newind.fitness = copy.deepcopy(rosenbrock_seeding_fitness(newind.gene)) #TODO UPDATE DEPENDING ON FITNESS FUNCT USED -> line 82
+        newind.fitness = copy.deepcopy(rosenbrock_seeding_fitness(newind.gene))
         population.append(newind)
     return population
 
@@ -89,7 +93,7 @@ def recombination(offspring):
         tempoff1 = copy.deepcopy(offspring[i])
         tempoff2 = copy.deepcopy(offspring[i+1])
         temp = copy.deepcopy(offspring[i])
-        crosspoint = random.randint(1,N)
+        crosspoint = random.randint(0,N-1)
 
         for j in range (crosspoint, N):
             tempoff1.gene[j] = tempoff2.gene[j]
@@ -107,18 +111,15 @@ def arithmetic_recombination(offspring):
 
     tempoff1 = individual()
     tempoff2 = individual()
-    temp = individual()
     for i in range( 0, P, 2 ):
         tempoff1 = copy.deepcopy(offspring[i])
         tempoff2 = copy.deepcopy(offspring[i+1])
-        temp = copy.deepcopy(offspring[i])
 
-        crossprob = random.random() #! use to control how often genes get crossed
-        #TODO implement crossover probability
+        # crosspoint = random.randint(0,N-1)
 
         for j in range (0, N):
-            tempoff1.gene[j] = ARITHMETIC_STEP * tempoff1.gene[j] + (1-ARITHMETIC_STEP) * tempoff2[j]
-            tempoff2.gene[j] = ARITHMETIC_STEP * tempoff2.gene[j] + (1-ARITHMETIC_STEP) * tempoff1[j]
+            tempoff1.gene[j] = RECOM_STEP * tempoff1.gene[j] + (1-RECOM_STEP) * tempoff2.gene[j]
+            tempoff2.gene[j] = RECOM_STEP * tempoff2.gene[j] + (1-RECOM_STEP) * tempoff1.gene[j]
 
         offspring[i] = copy.deepcopy(tempoff1)
         offspring[i+1] = copy.deepcopy(tempoff2)
@@ -144,80 +145,31 @@ def mutation(offspring, mut, step):
         offspring[i] = copy.deepcopy(newind)
     return offspring
 
-def gaussian_mutation(offspring):
-    for i in range(P):
-        newind = individual()
-        for j in range(0, N):
-            gene = offspring[i].gene[j]
-            mutprob = random.random()
-            if mutprob < mut :
-                ui = ui(gene)
-                step = mut_step()
-                gene = gene + np.sqrt(2) * STEP * (GMAX-(-GMIN)) * sp.erfcinv(ui)
-            newind.gene.append(gene)
-        offspring[i] = copy.deepcopy(newind)
-    return offspring
-
-def mut_step():
-    return MUTATION/(GMAX-(-GMIN))
-
-def ui(gene):
-    ui = random.random()
-    if ui >= 0.5: 
-        ul = ul_or_ur(gene, "UL")
-        return 2 * ul * (1 - 2*ui)
-    else:
-        ur = ul_or_ur(gene, "UR")
-        return 2 * ur * (2*ui - 1)
-
-    raise Exception("No U'i was returned - Something's gone wrong during mutation")
-
-
-def ul_or_ur(gene, U):
-    if U == "UL":  return  0.5*(sp.erf((-GMIN-gene)/(np.sqrt(2)*(GMAX-(-GMIN)*STEP))) + 1)
-    elif U == "UR": return 0.5*(sp.erf((GMAX-gene)/(np.sqrt(2)*(GMAX-(-GMIN)*STEP))) + 1)
-    else: raise Exception("UL / UR was not calculated - Something's gone wrong during mutation")
-
-
-
-def normal_dist(x , mean , sd):
-    prob_density = (np.pi*sd) * np.exp(-0.5*((x-mean)/sd)**2)
-    return prob_density
-
-def gaussian_mutation(offspring, mut, step):
-    offspring_fitness = []
-    mean = 0
-    sdeviation = 0
-
-    for ft in range(P):
-        offspring_fitness.append(offspring[ft].fitness)
-        
-    mean = np.mean(offspring_fitness)
-    sdeviation = np.std(offspring_fitness)
-
-    # norm_dist = normal_dist(offspring_fitness, mean, sdeviation)
-    # plt.plot(offspring_fitness, norm_dist , color = 'red')
-    # plt.xlabel('Data points')   
-    # plt.ylabel('Probability Density')
-
+def gaussian_mutation(offspring, mut):
     # --- MUTATION
+    gauss_mean = [offspring[i].fitness for i in range(P)]
+    mu = statistics.mean(gauss_mean)
+    # sigma = STEP/(GMAX-GMIN)
+
     for i in range(0, P):
         newind = individual()
         for j in range(0, N):
             gene = offspring[i].gene[j]
             mutprob = random.random()
             if mutprob < mut :
-
-                alter = random.uniform(0, step)
-                if random.randint(0, 1) :
-                    gene = gene + alter
-                    if gene > GMAX: gene = GMAX
-                else :
-                    gene = gene - alter
-                    if gene < GMIN : gene = GMIN
+                # alter = random.uniform(0, step)
+                alter = mutprob = random.gauss(0, STEP)
+                print(f"Gaussian alter step: {alter}")
+                gene = gene + alter
             newind.gene.append(gene)
         offspring[i] = copy.deepcopy(newind)
     return offspring
+
+
+def normal_dist(x , mean , sd):
+    prob_density = (np.pi*sd) * np.exp(-0.5*((x-mean)/sd)**2)
+    return prob_density
+
 
 def utility(population, offspring):
     # --- SORT POPULATION / OFFSPRING --> AND PERSIST BEST INDIVIDUAL
@@ -230,24 +182,21 @@ def utility(population, offspring):
     
     return newPopulation
 
-def run(population, mut, step):
+def run(population):
     plotPopulationMean = []
     plotBest = []
 
     for generations in range(0, G):
 
         offspring = selection(population)
-        off_combined = recombination(offspring)
-        off_mutation = gaussian_mutation(off_combined, mut, step)
-        return
+        off_combined = arithmetic_recombination(offspring)
+        off_mutation = gaussian_mutation(off_combined, MUTATION)
         off_mutation = copy.deepcopy(rosenbrock_fitness_function(off_mutation))
         population = utility(population, off_mutation)
         
         offspring.clear()
 
-        pop_fitness = []
-        for ind in population:
-            pop_fitness.append(ind.fitness)
+        pop_fitness = [ind.fitness for ind in population]
         minFitness = min(pop_fitness)
         meanFitness = (sum(pop_fitness) / P)
 
@@ -269,11 +218,6 @@ def run(population, mut, step):
         
         # indent to here to generate table
 
-
-
-popBest, popMean = run(seed_pop(),MUTATION,STEP)
-exit()
-
 iteration_plot_best_individual = []
 iteration_plot_popMean = []
 iteration_average = []
@@ -281,7 +225,7 @@ iteration_average = []
 for i in range(10):
 
     # popBest, popMean = run(seed_pop(), table_range[0][mut], table_range[1][step])
-    popBest, popMean = run(seed_pop(),MUTATION,STEP)
+    popBest, popMean = run(seed_pop())
     print(f"{popBest[-6:]}")
 
     iteration_plot_best_individual.append(popBest)
