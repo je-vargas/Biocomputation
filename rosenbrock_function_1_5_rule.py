@@ -1,3 +1,4 @@
+from sympy.ntheory.factor_ import totient
 import matplotlib.pyplot as plt
 import numpy as np
 import statistics
@@ -22,11 +23,12 @@ G = 200
 CROSSOVER = 1
 GMIN = -100
 GMAX = 100
-STEP = 30
+# STEP = 30
+STEP = 1
 # RECOM_STEP = 0.5
 # MUTATION = 0.0015
 # MUTATION = 0.0
-MUTATION = 0.04
+MUTATION = 0.045
 # MUTATION = 0.00275
 # MUTATION = 0.0015
 # MUTATION = 0.02
@@ -55,6 +57,13 @@ def rosenbrock_fitness_function(population):
 
         population[i].fitness = copy.deepcopy(fitness)
     return population
+
+def rosenbrock_fitness_adaptive(gene):
+    '''assignment function 1'''
+    fitness = 0
+    for j in range(N-1):
+        fitness += 100 * pow(gene[j + 1] - gene[j] ** 2, 2) + pow(1 - gene[j], 2)
+    return fitness
 
 # --------- GA METHODS
 def seed_pop():
@@ -168,6 +177,41 @@ def gaussian_mutation(offspring, mut, step):
         offspring[i] = copy.deepcopy(newind)
     return offspring
 
+def gaussian_mutation_adaptive(offspring, mut, step, tot_mut, succ_mut):
+    # sigma = STEP/(GMAX-GMIN)
+
+    for i in range(0, P):
+        newind = individual()
+        for j in range(0, N):
+            gene = offspring[i].gene[j]
+            mutprob = random.random()
+            if mutprob < mut :
+                alter = mutprob = random.gauss(0, step)
+                if alter != 0: total_mutations += 1
+                gene = gene + alter
+            newind.gene.append(gene)
+
+        off_mut_fitness = rosenbrock_fitness_adaptive(gene)
+        off_fitness = rosenbrock_fitness_adaptive(offspring[i].gene)
+
+        if off_mut_fitness > off_fitness: succ_mut+= 1
+
+        offspring[i] = copy.deepcopy(newind)
+    return offspring, tot_mut, succ_mut
+
+def calculate_mutation(muteRate, K):
+    g = 0.1    # Test
+    # number of generations between changes of mutation rate
+    if totient(K) < (1 / 5 * 10):
+        muteRate = muteRate * g
+        K = 1
+    elif totient(K) > (1 / 5 * 10):
+        muteRate = muteRate / g
+        K = 1
+    elif totient(K) == (1 / 5 * 10):
+        K += K
+    return K, muteRate
+
 
 def normal_dist(x , mean , sd):
     prob_density = (np.pi*sd) * np.exp(-0.5*((x-mean)/sd)**2)
@@ -231,41 +275,76 @@ def run_gaussian(population, mut, step):
     
     return plotBest, plotPopulationMean
 
+def run_gaussian_adaptive(population, mut, step):
+    plotPopulationMean = []
+    plotBest = []
+    k = 1
+    tot_mut = 0
+    succ_mut = 0
+
+    for generations in range(0, G):
+
+        offspring = selection(population)
+        off_combined = arithmetic_recombination(offspring)
+
+        k, mut = calculate_mutation(mut, k)
+        print(f"new mut after adaptation: {mut}")
+        off_mutation = gaussian_mutation(off_combined, mut, step)
+
+        off_mutation = copy.deepcopy(rosenbrock_fitness_function(off_mutation))
+        population = utility(population, off_mutation)
+        
+        offspring.clear()
+
+        pop_fitness = [ind.fitness for ind in population]
+        minFitness = min(pop_fitness)
+        meanFitness = (sum(pop_fitness) / P)
+
+        plotBest.append(minFitness)
+        plotPopulationMean.append(meanFitness)
+        
+        tot_mut = 0
+        succ_mut = 0
+    
+    return plotBest, plotPopulationMean
+
     # ---------- Plot ----------
 
-table_range = [
-    [0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05],
-    [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26]
-]
+# table_range = [
+#     [0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05],
+#     [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26]
+# ]
 
-for mut in range(0, len(table_range[0])):
-    print("!! ------------- MUT CHANGE ------------- !!\n")
-    for step in range(0, len(table_range[1])):
+# for mut in range(0, len(table_range[0])):
+#     print("!! ------------- MUT CHANGE ------------- !!\n")
+#     for step in range(0, len(table_range[1])):
         
         # indent to here to generate table
 
-        # iteration_plot_best_individual = []
-        # iteration_plot_popMean = []
-        iteration_average = []
+iteration_plot_best_individual = []
+iteration_plot_popMean = []
+iteration_average = []
 
-        for i in range(10):
+for i in range(10):
 
-            popBest, popMean = run_gaussian(seed_pop(), table_range[0][mut], table_range[1][step])
-            # popBest, popMean = run(seed_pop())
-            print(f"{popBest[-6:]}")
+    # popBest, popMean = run_gaussian(seed_pop(), table_range[0][mut], table_range[1][step])
+    # popBest, popMean = run_gaussian_adaptive(seed_pop(), MUTATION, STEP)
+    popBest, popMean = run_gaussian(seed_pop(), MUTATION, STEP)
+    # popBest, popMean = run(seed_pop())
+    print(f"{popBest[-6:]}")
 
-            # iteration_plot_best_individual.append(popBest)
-            # iteration_plot_popMean.append(popMean)
-            iteration_average.append(popBest[-1])
-            
-        _10_iteration_best_ind_average = statistics.mean(iteration_average)
-        iteration_average.clear()
+    iteration_plot_best_individual.append(popBest)
+    iteration_plot_popMean.append(popMean)
+    iteration_average.append(popBest[-1])
+    
+_10_iteration_best_ind_average = statistics.mean(iteration_average)
+iteration_average.clear()
 
-        # popMean_sum = [sum(bestMean) for beastMean in iteration_plot_popMean]
-        # best_popMean  = min(popMean_sum)
-        # _10_iteration_lowest_popMean_index = popMean_sum.index(best_popMean)
-        print("RUN USING: \t|MUT: {0} \t|STEP: {1}".format(table_range[0][mut], table_range[1][step]))
-        print(f"10 runs using same parameters\nAVERAGE: {_10_iteration_best_ind_average}\n")
+# popMean_sum = [sum(beastMean) for beastMean in iteration_plot_popMean]
+# best_popMean  = min(popMean_sum)
+# _10_iteration_lowest_popMean_index = popMean_sum.index(best_popMean)
+# print("RUN USING: \t|MUT: {0} \t|STEP: {1}".format(table_range[0][mut], table_range[1][step]))
+print(f"10 runs using same parameters\nAVERAGE: {_10_iteration_best_ind_average}\n")
 
 
 
