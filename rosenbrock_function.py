@@ -16,17 +16,15 @@ class individual:
 
 P = 200 #600
 N = 20
-G = 200
-# G = 1000 #chinesGuy
+G = 300
 
-CROSSOVER = 1
 GMIN = -100
 GMAX = 100
-STEP = 30
+STEP = 4
 # RECOM_STEP = 0.5
 # MUTATION = 0.0015
 # MUTATION = 0.0
-MUTATION = 0.04
+MUTATION = 0.046
 # MUTATION = 0.00275
 # MUTATION = 0.0015
 # MUTATION = 0.02
@@ -231,11 +229,55 @@ def run_gaussian(population, mut, step):
     
     return plotBest, plotPopulationMean
 
-    # ---------- Plot ----------
+
+#? ------------ TEST RUN START FROM HERE
+
+iteration_plot_best_individual = []
+iteration_plot_popMean = []
+iteration_average = []
+
+for i in range(10):
+
+    popBest, popMean = run_gaussian(seed_pop(), MUTATION, STEP)
+    # popBest, popMean = run(seed_pop())
+    print(f"{popBest[-6:]}")
+
+    iteration_plot_best_individual.append(popBest)
+    iteration_plot_popMean.append(popMean)
+    iteration_average.append(popBest[-1])
+    
+_10_iteration_best_ind_average = statistics.mean(iteration_average)
+# iteration_average.clear()
+
+popMean_sum = [sum(beastMean) for beastMean in iteration_plot_popMean]
+beast_popMean  = min(popMean_sum)
+_10_iteration_lowest_popMean_index = popMean_sum.index(beast_popMean)
+
+#? ------------ PLOTTING CODE
+        
+plt.xlabel('generations')
+plt.ylabel('fitness')
+plt.plot(iteration_plot_popMean[_10_iteration_lowest_popMean_index], label = "BEAST ITERATION AVERAGE")
+plt.plot(iteration_plot_best_individual[0], label = "bestIndividual_r1")
+plt.plot(iteration_plot_best_individual[1], label = "bestIndividual_r2")
+plt.plot(iteration_plot_best_individual[2], label = "bestIndividual_r3")
+plt.plot(iteration_plot_best_individual[3], label = "bestIndividual_r4")
+plt.plot(iteration_plot_best_individual[4], label = "bestIndividual_r5")
+plt.plot(iteration_plot_best_individual[5], label = "bestIndividual_r1")
+plt.plot(iteration_plot_best_individual[6], label = "bestIndividual_r2")
+plt.plot(iteration_plot_best_individual[7], label = "bestIndividual_r3")
+plt.plot(iteration_plot_best_individual[8], label = "bestIndividual_r4")
+plt.plot(iteration_plot_best_individual[9], label = "bestIndividual_r5")
+plt.legend(loc="upper right")
+plt.show()
+
+exit()
+
+#? -------------------- TABLE PLOT --------------------
 
 table_range = [
-    [0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05],
-    [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26]
+    [0.046, 0.0475, 0.05, 0.0525, 0.055, 0.0575, 0.06, 0.0615],
+    [2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6]
 ]
 
 for mut in range(0, len(table_range[0])):
@@ -261,28 +303,8 @@ for mut in range(0, len(table_range[0])):
         _10_iteration_best_ind_average = statistics.mean(iteration_average)
         iteration_average.clear()
 
-        # popMean_sum = [sum(bestMean) for beastMean in iteration_plot_popMean]
-        # best_popMean  = min(popMean_sum)
-        # _10_iteration_lowest_popMean_index = popMean_sum.index(best_popMean)
+        # popMean_sum = [sum(beastMean) for beastMean in iteration_plot_popMean]
+        # beast_popMean  = min(popMean_sum)
+        # _10_iteration_lowest_popMean_index = popMean_sum.index(beast_popMean)
         print("RUN USING: \t|MUT: {0} \t|STEP: {1}".format(table_range[0][mut], table_range[1][step]))
         print(f"10 runs using same parameters\nAVERAGE: {_10_iteration_best_ind_average}\n")
-
-
-
-# ------------ PLOTTING CODE
-        
-# plt.xlabel('generations')
-# plt.ylabel('fitness')
-# plt.plot(iteration_plot_popMean[_10_iteration_lowest_popMean_index], label = "BEAST ITERATION AVERAGE")
-# plt.plot(iteration_plot_best_individual[0], label = "bestIndividual_r1")
-# plt.plot(iteration_plot_best_individual[1], label = "bestIndividual_r2")
-# plt.plot(iteration_plot_best_individual[2], label = "bestIndividual_r3")
-# plt.plot(iteration_plot_best_individual[3], label = "bestIndividual_r4")
-# plt.plot(iteration_plot_best_individual[4], label = "bestIndividual_r5")
-# plt.plot(iteration_plot_best_individual[5], label = "bestIndividual_r1")
-# plt.plot(iteration_plot_best_individual[6], label = "bestIndividual_r2")
-# plt.plot(iteration_plot_best_individual[7], label = "bestIndividual_r3")
-# plt.plot(iteration_plot_best_individual[8], label = "bestIndividual_r4")
-# plt.plot(iteration_plot_best_individual[9], label = "bestIndividual_r5")
-# plt.legend(loc="upper right")
-# plt.show()
