@@ -17,18 +17,18 @@ class individual:
 
 P = 200 #600
 N = 20
-G = 200
+G = 300
 # G = 1000 #chinesGuy
 
 CROSSOVER = 1
 GMIN = -100
 GMAX = 100
 # STEP = 30
-STEP = 1
+STEP = 4
 # RECOM_STEP = 0.5
 # MUTATION = 0.0015
 # MUTATION = 0.0
-MUTATION = 0.045
+MUTATION = 0.046
 # MUTATION = 0.00275
 # MUTATION = 0.0015
 # MUTATION = 0.02
@@ -46,7 +46,6 @@ def rosenbrock_seeding_fitness(gene):
     for j in range(N-1):
         fitness += 100 * pow(gene[j + 1] - gene[j] ** 2, 2) + pow(1 - gene[j], 2)
     return fitness
-    
 
 def rosenbrock_fitness_function(population):
     '''assignment function 1'''
@@ -57,13 +56,6 @@ def rosenbrock_fitness_function(population):
 
         population[i].fitness = copy.deepcopy(fitness)
     return population
-
-def rosenbrock_fitness_adaptive(gene):
-    '''assignment function 1'''
-    fitness = 0
-    for j in range(N-1):
-        fitness += 100 * pow(gene[j + 1] - gene[j] ** 2, 2) + pow(1 - gene[j], 2)
-    return fitness
 
 # --------- GA METHODS
 def seed_pop():
@@ -171,7 +163,7 @@ def gaussian_mutation(offspring, mut, step):
             gene = offspring[i].gene[j]
             mutprob = random.random()
             if mutprob < mut :
-                alter = mutprob = random.gauss(0, step)
+                alter = random.gauss(0, step)
                 gene = gene + alter
             newind.gene.append(gene)
         offspring[i] = copy.deepcopy(newind)
@@ -186,13 +178,13 @@ def gaussian_mutation_adaptive(offspring, mut, step, tot_mut, succ_mut):
             gene = offspring[i].gene[j]
             mutprob = random.random()
             if mutprob < mut :
-                alter = mutprob = random.gauss(0, step)
-                if alter != 0: total_mutations += 1
+                alter = random.gauss(0, step)
+                if alter != 0: tot_mut += 1
                 gene = gene + alter
             newind.gene.append(gene)
 
-        off_mut_fitness = rosenbrock_fitness_adaptive(gene)
-        off_fitness = rosenbrock_fitness_adaptive(offspring[i].gene)
+        off_mut_fitness = rosenbrock_seeding_fitness(newind.gene)
+        off_fitness = rosenbrock_seeding_fitness(offspring[i].gene)
 
         if off_mut_fitness > off_fitness: succ_mut+= 1
 
@@ -200,16 +192,19 @@ def gaussian_mutation_adaptive(offspring, mut, step, tot_mut, succ_mut):
     return offspring, tot_mut, succ_mut
 
 def calculate_mutation(muteRate, K):
-    g = 0.1    # Test
+    g = 0.85   # Test
     # number of generations between changes of mutation rate
-    if totient(K) < (1 / 5 * 10):
+    if K < (1/5):
         muteRate = muteRate * g
+        print(f"{K} is LESS than {1/5}\tMut: {muteRate}")
         K = 1
-    elif totient(K) > (1 / 5 * 10):
+    elif K > (1/5):
         muteRate = muteRate / g
+        print(f"{K} is GREATER than {1/5}\tMut: {muteRate}")
         K = 1
-    elif totient(K) == (1 / 5 * 10):
+    elif K == (1/5):
         K += K
+        print(f"{K} is EQUAL to {1/5}\tMut: {muteRate}")
     return K, muteRate
 
 
@@ -278,7 +273,7 @@ def run_gaussian(population, mut, step):
 def run_gaussian_adaptive(population, mut, step):
     plotPopulationMean = []
     plotBest = []
-    k = 1
+    k = 0 #1 should start K at 1 based on book
     tot_mut = 0
     succ_mut = 0
 
@@ -286,10 +281,7 @@ def run_gaussian_adaptive(population, mut, step):
 
         offspring = selection(population)
         off_combined = arithmetic_recombination(offspring)
-
-        k, mut = calculate_mutation(mut, k)
-        print(f"new mut after adaptation: {mut}")
-        off_mutation = gaussian_mutation(off_combined, mut, step)
+        off_mutation, tot_mut, succ_mut = gaussian_mutation_adaptive(offspring, mut, step, tot_mut, succ_mut)
 
         off_mutation = copy.deepcopy(rosenbrock_fitness_function(off_mutation))
         population = utility(population, off_mutation)
@@ -302,34 +294,26 @@ def run_gaussian_adaptive(population, mut, step):
 
         plotBest.append(minFitness)
         plotPopulationMean.append(meanFitness)
+
+        k = succ_mut / tot_mut
+        print(f"succ_mut: {succ_mut}, tot_mut: {tot_mut}")
+        k, mut = calculate_mutation(mut, k)
         
         tot_mut = 0
         succ_mut = 0
     
     return plotBest, plotPopulationMean
 
-    # ---------- Plot ----------
 
-# table_range = [
-#     [0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05],
-#     [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26]
-# ]
-
-# for mut in range(0, len(table_range[0])):
-#     print("!! ------------- MUT CHANGE ------------- !!\n")
-#     for step in range(0, len(table_range[1])):
-        
-        # indent to here to generate table
+#? ------------ TEST RUN START FROM HERE
 
 iteration_plot_best_individual = []
 iteration_plot_popMean = []
 iteration_average = []
 
-for i in range(10):
+for i in range(2):
 
-    # popBest, popMean = run_gaussian(seed_pop(), table_range[0][mut], table_range[1][step])
-    # popBest, popMean = run_gaussian_adaptive(seed_pop(), MUTATION, STEP)
-    popBest, popMean = run_gaussian(seed_pop(), MUTATION, STEP)
+    popBest, popMean = run_gaussian_adaptive(seed_pop(), MUTATION, STEP)
     # popBest, popMean = run(seed_pop())
     print(f"{popBest[-6:]}")
 
@@ -338,22 +322,17 @@ for i in range(10):
     iteration_average.append(popBest[-1])
     
 _10_iteration_best_ind_average = statistics.mean(iteration_average)
-iteration_average.clear()
 
-# popMean_sum = [sum(beastMean) for beastMean in iteration_plot_popMean]
-# best_popMean  = min(popMean_sum)
-# _10_iteration_lowest_popMean_index = popMean_sum.index(best_popMean)
-# print("RUN USING: \t|MUT: {0} \t|STEP: {1}".format(table_range[0][mut], table_range[1][step]))
-print(f"10 runs using same parameters\nAVERAGE: {_10_iteration_best_ind_average}\n")
+popMean_sum = [sum(beastMean) for beastMean in iteration_plot_popMean]
+beast_popMean  = min(popMean_sum)
+_10_iteration_lowest_popMean_index = popMean_sum.index(beast_popMean)
 
-
-
-# ------------ PLOTTING CODE
+#? ------------ PLOTTING CODE
         
-# plt.xlabel('generations')
-# plt.ylabel('fitness')
-# plt.plot(iteration_plot_popMean[_10_iteration_lowest_popMean_index], label = "BEAST ITERATION AVERAGE")
-# plt.plot(iteration_plot_best_individual[0], label = "bestIndividual_r1")
+plt.xlabel('generations')
+plt.ylabel('fitness')
+plt.plot(iteration_plot_popMean[_10_iteration_lowest_popMean_index], label = "BEAST ITERATION AVERAGE")
+plt.plot(iteration_plot_best_individual[0], label = "bestIndividual_r1")
 # plt.plot(iteration_plot_best_individual[1], label = "bestIndividual_r2")
 # plt.plot(iteration_plot_best_individual[2], label = "bestIndividual_r3")
 # plt.plot(iteration_plot_best_individual[3], label = "bestIndividual_r4")
@@ -363,5 +342,5 @@ print(f"10 runs using same parameters\nAVERAGE: {_10_iteration_best_ind_average}
 # plt.plot(iteration_plot_best_individual[7], label = "bestIndividual_r3")
 # plt.plot(iteration_plot_best_individual[8], label = "bestIndividual_r4")
 # plt.plot(iteration_plot_best_individual[9], label = "bestIndividual_r5")
-# plt.legend(loc="upper right")
-# plt.show()
+plt.legend(loc="upper right")
+plt.show()
