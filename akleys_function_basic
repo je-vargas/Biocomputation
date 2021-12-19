@@ -213,29 +213,29 @@ def run(population, mut, step):
 # plt.legend(loc="upper right")
 # plt.show()
 
-#? -------------------- TABLE PLOT --------------------
+# #? -------------------- TABLE PLOT --------------------
 
-table_range = [
-    [0.0075, 0.0085, 0.009, 0.01, 0.015, 0.025, 0.035],
-    [1, 2, 3, 4, 5, 6, 7, 8, 9]
-]
+# table_range = [
+#     [0.0025, 0.003, 0.005, 0.01, 0.03, 0.05, 0.1, 0.3],
+#     [10, 20, 30]
+# ]
 
-for mut in range(0, len(table_range[0])):
-    print("!! ------------- MUT CHANGE ------------- !!\n")
-    for step in range(0, len(table_range[1])):
+# for mut in range(0, len(table_range[0])):
+#     print("!! ------------- MUT CHANGE ------------- !!\n")
+#     for step in range(0, len(table_range[1])):
         
-        #? indent to here to generate table
-        iteration_average = []
+#         #? indent to here to generate table
+#         iteration_average = []
 
-        for i in range(5):
+#         for i in range(5):
 
-            popBest, popMean = run(seed_pop(), table_range[0][mut], table_range[1][step])
-            print(f"{popBest[-6:]}")
+#             popBest, popMean = run(seed_pop(), table_range[0][mut], table_range[1][step])
+#             print(f"{popBest[-6:]}")
 
-            iteration_average.append(popBest[-1])
+#             iteration_average.append(popBest[-1])
             
-        _5_iteration_best_ind_average = statistics.mean(iteration_average)
-        iteration_average.clear()
+#         _5_iteration_best_ind_average = statistics.mean(iteration_average)
+#         iteration_average.clear()
 
-        print("RUN USING: \t|MUT: {0} \t|STEP: {1}".format(table_range[0][mut], table_range[1][step]))
-        print(f"5 RUN AVERAGE: {_5_iteration_best_ind_average}\n")
+#         print("RUN USING: \t|MUT: {0} \t|STEP: {1}".format(table_range[0][mut], table_range[1][step]))
+#         print(f"5 RUN AVERAGE: {_5_iteration_best_ind_average}\n")
