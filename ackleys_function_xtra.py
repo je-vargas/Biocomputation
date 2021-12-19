@@ -227,14 +227,14 @@ def run_gau_arithmetic(population):
 
     # ---------- Plot ----------
 
-popBest, popMean = run_gau_arithmetic(seed_pop())
+# popBest, popMean = run_gau_arithmetic(seed_pop())
 
-plt.xlabel('generations')
-plt.ylabel('fitness')
-plt.plot(popMean, label = "popAverage")
-plt.plot(popBest, label = "bestIndividual")
-plt.legend(loc="upper right")
-plt.show()
+# plt.xlabel('generations')
+# plt.ylabel('fitness')
+# plt.plot(popMean, label = "popAverage")
+# plt.plot(popBest, label = "bestIndividual")
+# plt.legend(loc="upper right")
+# plt.show()
 
 
 _5_iterations_best_plot = [] 
@@ -256,7 +256,6 @@ popMean_sum = [sum(beastMean) for beastMean in _5_iteration_popMean_plot]
 beast_popMean  = min(popMean_sum)
 _10_iteration_lowest_popMean_index = popMean_sum.index(beast_popMean)
 
-average = sum(_5_iteration_popMean_plot)/10
 print(f"AVERAGE : {_5_iteration_best_ind_average}")
 
 plt.title("Akleys")
@@ -268,10 +267,5 @@ plt.plot(_5_iterations_best_plot[1], label = "bestIndividual_r2")
 plt.plot(_5_iterations_best_plot[2], label = "bestIndividual_r3")
 plt.plot(_5_iterations_best_plot[3], label = "bestIndividual_r4")
 plt.plot(_5_iterations_best_plot[4], label = "bestIndividual_r5")
-plt.plot(_5_iterations_best_plot[5], label = "bestIndividual_r6")
-plt.plot(_5_iterations_best_plot[6], label = "bestIndividual_r7")
-plt.plot(_5_iterations_best_plot[7], label = "bestIndividual_r8")
-plt.plot(_5_iterations_best_plot[8], label = "bestIndividual_r9")
-plt.plot(_5_iterations_best_plot[9], label = "bestIndividual_r10")
 plt.legend(loc="upper right")
 plt.show()

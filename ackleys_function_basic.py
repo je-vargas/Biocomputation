@@ -23,29 +23,19 @@ GMAX = 32
 STEP = 2.5
 
 # --------- FITNESS FUNCTIONS
-def rose():
-    fitness = 0
-    return fitness + 100 * pow(1 ** 2, 2) + pow(1 - 1, 2)
-
-
-def ackleys_fitness_passing_0():
-    fitness = 0
-    firstSum = 0
-    secondSum = 0
-
-    firstSum += 0**2
-    secondSum += np.cos(2*np.pi*0)
-    fitness += -20.0*np.exp((-0.2*np.sqrt(firstSum/N)) - np.exp(secondSum/N))
-    return fitness
-
 def ackleys_fitness_seeding(gene):
     fitness = 0
     firstSum = 0
     secondSum = 0
+
     for j in range(N):
         firstSum += gene[j]**2
         secondSum += np.cos(2*np.pi*gene[j])
-        fitness += -20.0*np.exp((-0.2*np.sqrt(firstSum/N)) - np.exp(secondSum/N))
+
+    sect_1 = -20 * np.exp(-0.2 * np.sqrt((1/N) * firstSum))
+    sect_2 = np.exp((1/N)*secondSum)
+    fitness = sect_1 - sect_2
+        
     return fitness
 
 def ackleys_fitness_function(population):
@@ -53,10 +43,14 @@ def ackleys_fitness_function(population):
         fitness = 0
         firstSum = 0
         secondSum = 0
-        for j in range(N):
+
+        for j in range(0, N):
             firstSum += population[i].gene[j]**2
             secondSum += np.cos(2*np.pi*population[i].gene[j])
-            fitness += -20.0 * np.exp(-0.2 * np.sqrt(firstSum/N)) - np.exp(secondSum/N)
+        
+        sect_1 = -20 * np.exp(-0.2 * np.sqrt((1/N) * firstSum))
+        sect_2 = np.exp((1/N)*secondSum)
+        fitness = sect_1 - sect_2
     
         population[i].fitness = copy.deepcopy(fitness)
     return population
@@ -168,15 +162,20 @@ def run(population):
 
     # ---------- Plot ----------
 
-
-print((ackleys_fitness_passing_0()))
-print((rose()))
+best = [0 for i in range(20)]
+brose = [1 for i in range(20)]
+print(len(best))
+print("Akle: {0}".format(ackleys_fitness_seeding(best)))
 exit()
-popBest, popMean = run(seed_pop())
 
-plt.xlabel('generations')
-plt.ylabel('fitness')
-plt.plot(popMean, label = "popAverage")
-plt.plot(popBest, label = "bestIndividual")
-plt.legend(loc="upper right")
-plt.show()
+# -22.718281828459045 = 1
+
+
+# popBest, popMean = run(seed_pop())
+
+# plt.xlabel('generations')
+# plt.ylabel('fitness')
+# plt.plot(popMean, label = "popAverage")
+# plt.plot(popBest, label = "bestIndividual")
+# plt.legend(loc="upper right")
+# plt.show()
