@@ -18,14 +18,19 @@ G = 120
 # G = 1000 #chinesGuy
 
 # CrossOver Rate ? might be useful to
-GMIN = 100
-GMAX = -100
-STEP = 4
+GMIN = 32
+GMAX = -32
+# GMIN = 100
+# GMAX = -100
+STEP = 5.5
 # LOW_MUTATION = 0.0015
 # HIGH_MUTATION = 0.003
 # LOW_MUTATION = 0.00275
 # HIGH_MUTATION = 0.004
-MUTATION = 0.046
+
+# MUTATION = 0.046
+MUTATION = 0.0025
+
 # MUTATION = 0.0015
 # MUTATION = 0.02
 # MUTATION = 0.0010
@@ -37,6 +42,12 @@ MUTATION = 0.046
 
 # --------- FITNESS FUNCTIONS
 
+def rosenbrock_seeding_fitness(gene):
+    fitness = 0
+    for j in range(N-1):
+        fitness += 100 * pow(gene[j + 1] - gene[j] ** 2, 2) + pow(1 - gene[j], 2)
+    return fitness
+
 def rosenbrock_fitness_function(population):
     '''assignment function 1'''
     for i in range(0, len(population)):
@@ -44,7 +55,6 @@ def rosenbrock_fitness_function(population):
         for j in range(N-1):
             fitness += 100 * pow(population[i].gene[j + 1] - population[i].gene[j] ** 2, 2) + pow(1 - population[i].gene[j], 2)
 
-    
         population[i].fitness = copy.deepcopy(fitness)
     return population
 
@@ -57,7 +67,7 @@ def seed_pop():
             tempgene.append(random.uniform(GMIN, GMAX))
         newind = individual()
         newind.gene = copy.deepcopy(tempgene)
-        # newind.fitness = fit.rastrigin_fitness_function(newind.gene) #TODO UPDATE DEPENDING ON FITNESS FUNCT USED -> line 82
+        newind.fitness = copy.deepcopy(rosenbrock_seeding_fitness(newind.gene))
         population.append(newind)
     return population
 
@@ -210,10 +220,7 @@ def run(population):
 run_5_best = [] 
 run_5_mean = []
 for i in range(10):
-    population = seed_pop()
-    population = copy.deepcopy(rosenbrock_fitness_function(population))
-    popBest, popMean = run(population)
-    population.clear()
+    popBest, popMean = run(seed_pop())
 
     run_5_mean.append(popBest[-1])
     print(f"{popBest[-1]}")
