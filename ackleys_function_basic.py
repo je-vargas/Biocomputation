@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import statistics
 import numpy as np
 import random
 import copy
@@ -12,56 +13,50 @@ class individual:
     def __str__ (self):
         return f"Genes:\n{self.gene}\nFitness: {self.fitness}\t| RelativeFitness: {self.relativeFitness}\n"
 
-P = 1500
+P = 200
 N = 20
-G = 60
-# MUTATIONSTEP = 1.0
-# MUTATION = 0.15
-# MUTATION = 0.02
-# MUTATION = 0.5
-# MUTATION = 0.01
-MUTATION = 0.00275
-# GMIN = -5.12
-# GMAX = 5.12
-# GMIN = 100
-# GMAX = -100
+G = 200
+
+MUTATION = 0.025
 GMIN = -32
 GMAX = 32
-STEP = 4
+STEP = 2.5
 
 # --------- FITNESS FUNCTIONS
-def rastrigin_fitness_function(population):
-    '''worksheet3'''
-    for i in range(0, len(population)):
-        
-        fitness = 10 * N
-        for j in range (N):
-            fitness += (population[i].gene[j] ** 2 - 10 * np.cos(2*np.pi*population[i].gene[j]))
-        
-        population[i].fitness = copy.deepcopy(fitness)
-    return population
+def rose():
+    fitness = 0
+    return fitness + 100 * pow(1 ** 2, 2) + pow(1 - 1, 2)
 
-def rosenbrock_fitness_function(population):
-    '''assignment function 1'''
-    for i in range(0, len(population)):
-        fitness = 0
-        for j in range(N-1):
-            fitness += 100*(population[i].gene[j+1]-(population[i].gene[j]**2))**2+((1-population[i].gene[j])**2)
-    
-        population[i].fitness = copy.deepcopy(fitness)
-    return population
+
+def ackleys_fitness_passing_0():
+    fitness = 0
+    firstSum = 0
+    secondSum = 0
+
+    firstSum += 0**2
+    secondSum += np.cos(2*np.pi*0)
+    fitness += -20.0*np.exp((-0.2*np.sqrt(firstSum/N)) - np.exp(secondSum/N))
+    return fitness
+
+def ackleys_fitness_seeding(gene):
+    fitness = 0
+    firstSum = 0
+    secondSum = 0
+    for j in range(N):
+        firstSum += gene[j]**2
+        secondSum += np.cos(2*np.pi*gene[j])
+        fitness += -20.0*np.exp((-0.2*np.sqrt(firstSum/N)) - np.exp(secondSum/N))
+    return fitness
 
 def ackleys_fitness_function(population):
-    '''might be ackleys function'''
-
     for i in range(0, len(population)):
         fitness = 0
         firstSum = 0
         secondSum = 0
         for j in range(N):
             firstSum += population[i].gene[j]**2
-            secondSum = np.cos(2*np.pi*population[i].gene[j])
-            fitness += -20.0*np.exp((-0.2*np.sqrt(firstSum/N)) - np.exp(secondSum/N))
+            secondSum += np.cos(2*np.pi*population[i].gene[j])
+            fitness += -20.0 * np.exp(-0.2 * np.sqrt(firstSum/N)) - np.exp(secondSum/N)
     
         population[i].fitness = copy.deepcopy(fitness)
     return population
@@ -75,7 +70,7 @@ def seed_pop():
             tempgene.append(random.uniform(GMIN, GMAX))
         newind = individual()
         newind.gene = copy.deepcopy(tempgene)
-        # newind.fitness = fit.rastrigin_fitness_function(newind.gene) #TODO UPDATE DEPENDING ON FITNESS FUNCT USED -> line 82
+        newind.fitness = ackleys_fitness_seeding(newind.gene)
         population.append(newind)
     return population
 
@@ -154,7 +149,6 @@ def run(population):
         offspring = selection(population)
         off_combined = recombination(offspring)
         off_mutation = mutation(off_combined)
-        # off_mutation = copy.deepcopy(rosenbrock_fitness_function(off_mutation))
         off_mutation = copy.deepcopy(ackleys_fitness_function(off_mutation))
         population = utility(population, off_mutation)
         
@@ -170,16 +164,15 @@ def run(population):
         plotPopulationMean.append(meanFitness)
     
     return plotBest, plotPopulationMean
-
     
-
 
     # ---------- Plot ----------
 
-population = seed_pop()
-# population = copy.deepcopy(rosenbrock_fitness_function(population))
-population = copy.deepcopy(ackleys_fitness_function(population))
-popBest, popMean = run(population)
+
+print((ackleys_fitness_passing_0()))
+print((rose()))
+exit()
+popBest, popMean = run(seed_pop())
 
 plt.xlabel('generations')
 plt.ylabel('fitness')
