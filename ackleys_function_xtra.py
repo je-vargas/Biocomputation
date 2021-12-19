@@ -86,25 +86,6 @@ def selection(population):
             offspring.append( off2 )
     return offspring
 
-def recombination(offspring):
-    # --- RECOMBINATION  (crossover)
-    tempoff1 = individual()
-    tempoff2 = individual()
-    temp = individual()
-    for i in range( 0, P, 2 ):
-        tempoff1 = copy.deepcopy(offspring[i])
-        tempoff2 = copy.deepcopy(offspring[i+1])
-        temp = copy.deepcopy(offspring[i])
-        crosspoint = random.randint(1,N)
-
-        for j in range (crosspoint, N):
-            tempoff1.gene[j] = tempoff2.gene[j]
-            tempoff2.gene[j] = temp.gene[j]
-
-        offspring[i] = copy.deepcopy(tempoff1)
-        offspring[i+1] = copy.deepcopy(tempoff2)
-    return offspring
-
 def arithmetic_recombination(offspring):
     # --- Remember random weight of 0.5 will prouce twins 
     # Child1 = α.x + (1-α).y
@@ -125,26 +106,6 @@ def arithmetic_recombination(offspring):
 
         offspring[i] = copy.deepcopy(tempoff1)
         offspring[i+1] = copy.deepcopy(tempoff2)
-    return offspring
-
-def mutation(offspring):
-    # --- MUTATION
-    for i in range(0, P):
-        newind = individual()
-        for j in range(0, N):
-            gene = offspring[i].gene[j]
-            mutprob = random.random()
-            if mutprob < MUTATION :
-                alter = random.uniform(0, STEP)
-                # print(f"gene alter by: {alter}\n")
-                if random.randint(0, 1) :
-                    gene = gene + alter
-                    if gene > GMAX: gene = GMAX
-                else :
-                    gene = gene - alter
-                    if gene < GMIN : gene = GMIN
-            newind.gene.append(gene)
-        offspring[i] = copy.deepcopy(newind)
     return offspring
 
 def gaussian_mutation(offspring, mut, step):
@@ -177,31 +138,6 @@ def utility(population, offspring):
     
     return newPopulation
 
-def run(population):
-    plotPopulationMean = []
-    plotBest = []
-
-    for generations in range(0, G):
-
-        offspring = selection(population)
-        off_combined = recombination(offspring)
-        off_mutation = mutation(off_combined)
-        off_mutation = copy.deepcopy(ackleys_fitness_function(off_mutation))
-        population = utility(population, off_mutation)
-        
-        offspring.clear()
-
-        pop_fitness = []
-        for ind in population:
-            pop_fitness.append(ind.fitness)
-        minFitness = min(pop_fitness)
-        meanFitness = (sum(pop_fitness) / P)
-
-        plotBest.append(minFitness)
-        plotPopulationMean.append(meanFitness)
-    
-    return plotBest, plotPopulationMean
-
 def run_gau_arithmetic(population):
     plotPopulationMean = []
     plotBest = []
@@ -227,6 +163,70 @@ def run_gau_arithmetic(population):
 
     # ---------- Plot ----------
 
+    #? -------------------- TABLE PLOT --------------------
+
+table_range = [
+    [0.005, 0.007, 0.01, 0.03, 0.07, 0.1],
+    [3, 6, 9, 12, 15]
+]
+
+for mut in range(0, len(table_range[0])):
+    print("!! ------------- MUT CHANGE ------------- !!\n")
+    for step in range(0, len(table_range[1])):
+        
+        #? indent to here to generate table
+        iteration_average = []
+
+        for i in range(5):
+
+            popBest, popMean = run_gau_arithmetic(seed_pop(), table_range[0][mut], table_range[1][step])
+            print(f"{popBest[-6:]}")
+
+            iteration_average.append(popBest[-1])
+            
+        _5_iteration_best_ind_average = statistics.mean(iteration_average)
+        iteration_average.clear()
+
+        print("RUN USING: \t|MUT: {0} \t|STEP: {1}".format(table_range[0][mut], table_range[1][step]))
+        print(f"5 RUN AVERAGE: {_5_iteration_best_ind_average}\n")
+
+#? --------------------  --------------------
+
+
+# _5_iterations_best_plot = [] 
+# _5_iteration_popMean_plot = []
+# iteration_average = []
+# for i in range(5):
+#     popBest, popMean = run_gau_arithmetic(seed_pop())
+
+#     _5_iterations_best_plot.append(popBest)
+#     _5_iteration_popMean_plot.append(popMean)
+#     iteration_average.append(popBest[-1])
+
+#     print(f"{popBest[-6:]}")
+
+# _5_iteration_best_ind_average = statistics.mean(iteration_average)
+
+# # plots against the best mean returned from 5 runs 
+# popMean_sum = [sum(beastMean) for beastMean in _5_iteration_popMean_plot]
+# beast_popMean  = min(popMean_sum)
+# _10_iteration_lowest_popMean_index = popMean_sum.index(beast_popMean)
+
+# print(f"AVERAGE : {_5_iteration_best_ind_average}")
+
+# plt.title("Akleys")
+# plt.xlabel('Generations')
+# plt.ylabel('Fitness')
+# plt.plot(popMean, label = "popAverage")
+# plt.plot(_5_iterations_best_plot[0], label = "bestIndividual_r1")
+# plt.plot(_5_iterations_best_plot[1], label = "bestIndividual_r2")
+# plt.plot(_5_iterations_best_plot[2], label = "bestIndividual_r3")
+# plt.plot(_5_iterations_best_plot[3], label = "bestIndividual_r4")
+# plt.plot(_5_iterations_best_plot[4], label = "bestIndividual_r5")
+# plt.legend(loc="upper right")
+# plt.show()
+
+
 # popBest, popMean = run_gau_arithmetic(seed_pop())
 
 # plt.xlabel('generations')
@@ -235,37 +235,3 @@ def run_gau_arithmetic(population):
 # plt.plot(popBest, label = "bestIndividual")
 # plt.legend(loc="upper right")
 # plt.show()
-
-
-_5_iterations_best_plot = [] 
-_5_iteration_popMean_plot = []
-iteration_average = []
-for i in range(5):
-    popBest, popMean = run_gau_arithmetic(seed_pop())
-
-    _5_iterations_best_plot.append(popBest)
-    _5_iteration_popMean_plot.append(popMean)
-    iteration_average.append(popBest[-1])
-
-    print(f"{popBest[-6:]}")
-
-_5_iteration_best_ind_average = statistics.mean(iteration_average)
-
-# plots against the best mean returned from 5 runs 
-popMean_sum = [sum(beastMean) for beastMean in _5_iteration_popMean_plot]
-beast_popMean  = min(popMean_sum)
-_10_iteration_lowest_popMean_index = popMean_sum.index(beast_popMean)
-
-print(f"AVERAGE : {_5_iteration_best_ind_average}")
-
-plt.title("Akleys")
-plt.xlabel('Generations')
-plt.ylabel('Fitness')
-plt.plot(popMean, label = "popAverage")
-plt.plot(_5_iterations_best_plot[0], label = "bestIndividual_r1")
-plt.plot(_5_iterations_best_plot[1], label = "bestIndividual_r2")
-plt.plot(_5_iterations_best_plot[2], label = "bestIndividual_r3")
-plt.plot(_5_iterations_best_plot[3], label = "bestIndividual_r4")
-plt.plot(_5_iterations_best_plot[4], label = "bestIndividual_r5")
-plt.legend(loc="upper right")
-plt.show()
