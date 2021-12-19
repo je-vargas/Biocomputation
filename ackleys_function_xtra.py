@@ -3,6 +3,7 @@ import statistics
 import numpy as np
 import random
 import copy
+import math
 
 class individual:
     def __init__(self):
@@ -29,23 +30,30 @@ def ackleys_fitness_seeding(gene):
     fitness = 0
     firstSum = 0
     secondSum = 0
+
     for j in range(N):
         firstSum += gene[j]**2
         secondSum += np.cos(2*np.pi*gene[j])
-        fitness += -20.0*np.exp((-0.2*np.sqrt(firstSum/N)) - np.exp(secondSum/N))
+
+    sect_1 = -20 * np.exp(-0.2 * np.sqrt((1/N) * firstSum))
+    sect_2 = np.exp((1/N)*secondSum)
+    fitness = sect_1 - sect_2
+        
     return fitness
 
 def ackleys_fitness_function(population):
-
-
     for i in range(0, len(population)):
         fitness = 0
         firstSum = 0
         secondSum = 0
-        for j in range(N):
+
+        for j in range(0, N):
             firstSum += population[i].gene[j]**2
             secondSum += np.cos(2*np.pi*population[i].gene[j])
-            fitness += -20.0 * np.exp(-0.2 * np.sqrt(firstSum/N)) - np.exp(secondSum/N)
+        
+        sect_1 = -20 * np.exp(-0.2 * np.sqrt((1/N) * firstSum))
+        sect_2 = np.exp((1/N)*secondSum)
+        fitness = sect_1 - sect_2
     
         population[i].fitness = copy.deepcopy(fitness)
     return population
@@ -98,7 +106,7 @@ def recombination(offspring):
     return offspring
 
 def arithmetic_recombination(offspring):
-    # --- Remember alpha of 0.5 will prouce twins 
+    # --- Remember random weight of 0.5 will prouce twins 
     # Child1 = α.x + (1-α).y
     # Child2 = α.x + (1-α).y
 
@@ -108,13 +116,9 @@ def arithmetic_recombination(offspring):
         tempoff1 = copy.deepcopy(offspring[i])
         tempoff2 = copy.deepcopy(offspring[i+1])
 
-        # crosspoint = random.randint(0,N-1)
         random_weight = np.random.rand()
 
         for j in range (0, N):
-
-            # tempoff1.gene[j] = RECOM_STEP * tempoff1.gene[j] + (1-RECOM_STEP) * tempoff2.gene[j]
-            # tempoff2.gene[j] = RECOM_STEP * tempoff2.gene[j] + (1-RECOM_STEP) * tempoff1.gene[j]
 
             tempoff1.gene[j] = random_weight * tempoff1.gene[j] + (1-random_weight) * tempoff2.gene[j]
             tempoff2.gene[j] = random_weight * tempoff2.gene[j] + (1-random_weight) * tempoff1.gene[j]
@@ -122,7 +126,6 @@ def arithmetic_recombination(offspring):
         offspring[i] = copy.deepcopy(tempoff1)
         offspring[i+1] = copy.deepcopy(tempoff2)
     return offspring
-
 
 def mutation(offspring):
     # --- MUTATION
@@ -141,7 +144,6 @@ def mutation(offspring):
                     gene = gene - alter
                     if gene < GMIN : gene = GMIN
             newind.gene.append(gene)
-        # newind.fitness = fit.rastrigin_fitness_function(newind.gene) #TODO UPDATE DEPENDING ON FITNESS FUNCT USED
         offspring[i] = copy.deepcopy(newind)
     return offspring
 
@@ -214,9 +216,7 @@ def run_gau_arithmetic(population):
         
         offspring.clear()
 
-        pop_fitness = []
-        for ind in population:
-            pop_fitness.append(ind.fitness)
+        pop_fitness = [ind.fitness for ind in population]
         minFitness = min(pop_fitness)
         meanFitness = (sum(pop_fitness) / P)
 
@@ -225,17 +225,53 @@ def run_gau_arithmetic(population):
     
     return plotBest, plotPopulationMean
 
-    
-
-
     # ---------- Plot ----------
 
-# popBest, popMean = run(seed_pop())
 popBest, popMean = run_gau_arithmetic(seed_pop())
 
 plt.xlabel('generations')
 plt.ylabel('fitness')
 plt.plot(popMean, label = "popAverage")
 plt.plot(popBest, label = "bestIndividual")
+plt.legend(loc="upper right")
+plt.show()
+
+
+_5_iterations_best_plot = [] 
+_5_iteration_popMean_plot = []
+iteration_average = []
+for i in range(5):
+    popBest, popMean = run_gau_arithmetic(seed_pop())
+
+    _5_iterations_best_plot.append(popBest)
+    _5_iteration_popMean_plot.append(popMean)
+    iteration_average.append(popBest[-1])
+
+    print(f"{popBest[-6:]}")
+
+_5_iteration_best_ind_average = statistics.mean(iteration_average)
+
+# plots against the best mean returned from 5 runs 
+popMean_sum = [sum(beastMean) for beastMean in _5_iteration_popMean_plot]
+beast_popMean  = min(popMean_sum)
+_10_iteration_lowest_popMean_index = popMean_sum.index(beast_popMean)
+
+average = sum(_5_iteration_popMean_plot)/10
+print(f"AVERAGE : {_5_iteration_best_ind_average}")
+
+plt.title("Akleys")
+plt.xlabel('Generations')
+plt.ylabel('Fitness')
+plt.plot(popMean, label = "popAverage")
+plt.plot(_5_iterations_best_plot[0], label = "bestIndividual_r1")
+plt.plot(_5_iterations_best_plot[1], label = "bestIndividual_r2")
+plt.plot(_5_iterations_best_plot[2], label = "bestIndividual_r3")
+plt.plot(_5_iterations_best_plot[3], label = "bestIndividual_r4")
+plt.plot(_5_iterations_best_plot[4], label = "bestIndividual_r5")
+plt.plot(_5_iterations_best_plot[5], label = "bestIndividual_r6")
+plt.plot(_5_iterations_best_plot[6], label = "bestIndividual_r7")
+plt.plot(_5_iterations_best_plot[7], label = "bestIndividual_r8")
+plt.plot(_5_iterations_best_plot[8], label = "bestIndividual_r9")
+plt.plot(_5_iterations_best_plot[9], label = "bestIndividual_r10")
 plt.legend(loc="upper right")
 plt.show()
