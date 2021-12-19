@@ -16,12 +16,16 @@ class individual:
 
 P = 200
 N = 20
-G = 200
-
-MUTATION = 0.025
+G = 50
 GMIN = -32
 GMAX = 32
-STEP = 2.5
+
+# STEP = 1 #best
+# MUTATION = 0.03 #best
+
+MUTATION = 
+STEP = 
+
 
 # --------- FITNESS FUNCTIONS
 
@@ -138,7 +142,7 @@ def utility(population, offspring):
     
     return newPopulation
 
-def run_gau_arithmetic(population):
+def run_gau_arithmetic(population, mut, step):
     plotPopulationMean = []
     plotBest = []
 
@@ -146,7 +150,7 @@ def run_gau_arithmetic(population):
 
         offspring = selection(population)
         off_combined = arithmetic_recombination(offspring)
-        off_mutation = gaussian_mutation(off_combined, MUTATION, STEP)
+        off_mutation = gaussian_mutation(off_combined, mut, step)
         off_mutation = copy.deepcopy(ackleys_fitness_function(off_mutation))
         population = utility(population, off_mutation)
         
@@ -162,70 +166,42 @@ def run_gau_arithmetic(population):
     return plotBest, plotPopulationMean
 
     # ---------- Plot ----------
+#? -------------------- GA WITH AVERAGE --------------------
 
-    #? -------------------- TABLE PLOT --------------------
+_5_iterations_best_plot = [] 
+_5_iteration_popMean_plot = []
+iteration_average = []
+for i in range(5):
+    popBest, popMean = run_gau_arithmetic(seed_pop(), MUTATION, STEP)
 
-table_range = [
-    [0.005, 0.007, 0.01, 0.03, 0.07, 0.1],
-    [3, 6, 9, 12, 15]
-]
+    _5_iterations_best_plot.append(popBest)
+    _5_iteration_popMean_plot.append(popMean)
+    iteration_average.append(popBest[-1])
 
-for mut in range(0, len(table_range[0])):
-    print("!! ------------- MUT CHANGE ------------- !!\n")
-    for step in range(0, len(table_range[1])):
-        
-        #? indent to here to generate table
-        iteration_average = []
+    print(f"{popBest[-6:]}")
 
-        for i in range(5):
+_5_iteration_best_ind_average = statistics.mean(iteration_average)
 
-            popBest, popMean = run_gau_arithmetic(seed_pop(), table_range[0][mut], table_range[1][step])
-            print(f"{popBest[-6:]}")
+# plots against the best mean returned from 5 runs 
+popMean_sum = [sum(beastMean) for beastMean in _5_iteration_popMean_plot]
+beast_popMean  = min(popMean_sum)
+_10_iteration_lowest_popMean_index = popMean_sum.index(beast_popMean)
 
-            iteration_average.append(popBest[-1])
-            
-        _5_iteration_best_ind_average = statistics.mean(iteration_average)
-        iteration_average.clear()
+print(f"AVERAGE : {_5_iteration_best_ind_average}")
 
-        print("RUN USING: \t|MUT: {0} \t|STEP: {1}".format(table_range[0][mut], table_range[1][step]))
-        print(f"5 RUN AVERAGE: {_5_iteration_best_ind_average}\n")
-
-#? --------------------  --------------------
-
-
-# _5_iterations_best_plot = [] 
-# _5_iteration_popMean_plot = []
-# iteration_average = []
-# for i in range(5):
-#     popBest, popMean = run_gau_arithmetic(seed_pop())
-
-#     _5_iterations_best_plot.append(popBest)
-#     _5_iteration_popMean_plot.append(popMean)
-#     iteration_average.append(popBest[-1])
-
-#     print(f"{popBest[-6:]}")
-
-# _5_iteration_best_ind_average = statistics.mean(iteration_average)
-
-# # plots against the best mean returned from 5 runs 
-# popMean_sum = [sum(beastMean) for beastMean in _5_iteration_popMean_plot]
-# beast_popMean  = min(popMean_sum)
-# _10_iteration_lowest_popMean_index = popMean_sum.index(beast_popMean)
-
-# print(f"AVERAGE : {_5_iteration_best_ind_average}")
-
-# plt.title("Akleys")
-# plt.xlabel('Generations')
-# plt.ylabel('Fitness')
+plt.title("Akleys Mut: & Step: ")
+plt.xlabel('Generations')
+plt.ylabel('Fitness')
 # plt.plot(popMean, label = "popAverage")
-# plt.plot(_5_iterations_best_plot[0], label = "bestIndividual_r1")
-# plt.plot(_5_iterations_best_plot[1], label = "bestIndividual_r2")
-# plt.plot(_5_iterations_best_plot[2], label = "bestIndividual_r3")
-# plt.plot(_5_iterations_best_plot[3], label = "bestIndividual_r4")
-# plt.plot(_5_iterations_best_plot[4], label = "bestIndividual_r5")
-# plt.legend(loc="upper right")
-# plt.show()
+plt.plot(_5_iterations_best_plot[0], label = "bestIndividual_r1")
+plt.plot(_5_iterations_best_plot[1], label = "bestIndividual_r2")
+plt.plot(_5_iterations_best_plot[2], label = "bestIndividual_r3")
+plt.plot(_5_iterations_best_plot[3], label = "bestIndividual_r4")
+plt.plot(_5_iterations_best_plot[4], label = "bestIndividual_r5")
+plt.legend(loc="upper right")
+plt.show()
 
+#? -------------------- SINGLE GA No Average --------------------
 
 # popBest, popMean = run_gau_arithmetic(seed_pop())
 
@@ -235,3 +211,32 @@ for mut in range(0, len(table_range[0])):
 # plt.plot(popBest, label = "bestIndividual")
 # plt.legend(loc="upper right")
 # plt.show()
+
+#     #? -------------------- TABLE PLOT --------------------
+
+# table_range = [
+#     [0.0175, 0.02, 0.0225, 0.0255, 0.0275, 0.03, 0.0325, 0.0355, 0.04],
+#     [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6]
+# ]
+
+# for mut in range(0, len(table_range[0])):
+#     print("!! ------------- MUT CHANGE ------------- !!\n")
+#     for step in range(0, len(table_range[1])):
+        
+#         #? indent to here to generate table
+#         iteration_average = []
+
+#         for i in range(5):
+
+#             popBest, popMean = run_gau_arithmetic(seed_pop(), table_range[0][mut], table_range[1][step])
+#             print(f"{popBest[-6:]}")
+
+#             iteration_average.append(popBest[-1])
+            
+#         _5_iteration_best_ind_average = statistics.mean(iteration_average)
+#         iteration_average.clear()
+
+#         print("RUN USING: \t|MUT: {0} \t|STEP: {1}".format(table_range[0][mut], table_range[1][step]))
+#         print(f"5 RUN AVERAGE: {_5_iteration_best_ind_average}\n")
+
+# #? --------------------  --------------------
