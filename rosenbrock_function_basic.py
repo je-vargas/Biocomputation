@@ -20,12 +20,12 @@ G = 120
 # CrossOver Rate ? might be useful to
 GMIN = 100
 GMAX = -100
-STEP = 15
+STEP = 4
 # LOW_MUTATION = 0.0015
 # HIGH_MUTATION = 0.003
-LOW_MUTATION = 0.00275
-HIGH_MUTATION = 0.004
-# MUTATION = 0.00275
+# LOW_MUTATION = 0.00275
+# HIGH_MUTATION = 0.004
+MUTATION = 0.046
 # MUTATION = 0.0015
 # MUTATION = 0.02
 # MUTATION = 0.0010
@@ -95,7 +95,7 @@ def recombination(offspring):
         offspring[i+1] = copy.deepcopy(tempoff2)
     return offspring
 
-def mutation(offspring):
+def mutation_adaptive(offspring):
     gene = []
     #!don't need offspringFitness as this is list woth all fitness
     offspringFitness, meanFitness = population_fitness(offspring) 
@@ -142,6 +142,26 @@ def low_mutation(gene):
                 gene[i] = gene[i] - alter
                 if gene[i] < GMIN : gene[i] = GMIN
     return gene
+
+def mutation(offspring):
+    # --- MUTATION
+    for i in range(0, P):
+        newind = individual()
+        for j in range(0, N):
+            gene = offspring[i].gene[j]
+            mutprob = random.random()
+            if mutprob < MUTATION :
+                alter = random.uniform(0, STEP)
+                if random.randint(0, 1) :
+                    gene = gene + alter
+                    if gene > GMAX: gene = GMAX
+                else :
+                    gene = gene - alter
+                    if gene < GMIN : gene = GMIN
+            newind.gene.append(gene)
+        # newind.fitness = fit.rastrigin_fitness_function(newind.gene) #TODO UPDATE DEPENDING ON FITNESS FUNCT USED
+        offspring[i] = copy.deepcopy(newind)
+    return offspring
 
 def utility(population, offspring):
     # --- SORT POPULATION / OFFSPRING --> AND PERSIST BEST INDIVIDUAL
@@ -196,24 +216,25 @@ for i in range(10):
     population.clear()
 
     run_5_mean.append(popBest[-1])
-    print(f"{popBest[-1]}\n")
+    print(f"{popBest[-1]}")
     run_5_best.append(popBest)
 
 average = sum(run_5_mean)/10
 print(f"AVERAGE : {average}")
 
-plt.xlabel('generations')
-plt.ylabel('fitness')
-# plt.plot(popMean, label = "popAverage")
+plt.title("Rosenbrock - Mut: 0.046 & Step: 4\nSingle PcrossOver, Urandom mutation")
+plt.xlabel('Generations')
+plt.ylabel('Fitness')
+plt.plot(popMean, label = "popAverage")
 plt.plot(run_5_best[0], label = "bestIndividual_r1")
 plt.plot(run_5_best[1], label = "bestIndividual_r2")
 plt.plot(run_5_best[2], label = "bestIndividual_r3")
 plt.plot(run_5_best[3], label = "bestIndividual_r4")
 plt.plot(run_5_best[4], label = "bestIndividual_r5")
-plt.plot(run_5_best[5], label = "bestIndividual_r1")
-plt.plot(run_5_best[6], label = "bestIndividual_r2")
-plt.plot(run_5_best[7], label = "bestIndividual_r3")
-plt.plot(run_5_best[8], label = "bestIndividual_r4")
-plt.plot(run_5_best[9], label = "bestIndividual_r5")
+plt.plot(run_5_best[5], label = "bestIndividual_r6")
+plt.plot(run_5_best[6], label = "bestIndividual_r7")
+plt.plot(run_5_best[7], label = "bestIndividual_r8")
+plt.plot(run_5_best[8], label = "bestIndividual_r9")
+plt.plot(run_5_best[9], label = "bestIndividual_r10")
 plt.legend(loc="upper right")
 plt.show()
