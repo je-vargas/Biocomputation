@@ -17,10 +17,10 @@ P = 200
 N = 20
 G = 200
 
-MUTATION = 0.025
+MUTATION = 0.0025
 GMIN = -32
 GMAX = 32
-STEP = 2.5
+STEP = 5.5
 
 # --------- FITNESS FUNCTIONS
 def ackleys_fitness_seeding(gene):
@@ -64,7 +64,7 @@ def seed_pop():
             tempgene.append(random.uniform(GMIN, GMAX))
         newind = individual()
         newind.gene = copy.deepcopy(tempgene)
-        newind.fitness = ackleys_fitness_seeding(newind.gene)
+        newind.fitness = copy.deepcopy(ackleys_fitness_seeding(newind.gene))
         population.append(newind)
     return population
 
@@ -102,15 +102,15 @@ def recombination(offspring):
         offspring[i+1] = copy.deepcopy(tempoff2)
     return offspring
 
-def mutation(offspring, mut, step):
+def mutation(offspring):
     # --- MUTATION
     for i in range(0, P):
         newind = individual()
         for j in range(0, N):
             gene = offspring[i].gene[j]
             mutprob = random.random()
-            if mutprob < mut :
-                alter = random.uniform(0, step)
+            if mutprob < MUTATION :
+                alter = random.uniform(0, STEP)
                 if random.randint(0, 1) :
                     gene = gene + alter
                     if gene > GMAX: gene = GMAX
@@ -118,7 +118,6 @@ def mutation(offspring, mut, step):
                     gene = gene - alter
                     if gene < GMIN : gene = GMIN
             newind.gene.append(gene)
-        # newind.fitness = fit.rastrigin_fitness_function(newind.gene) #TODO UPDATE DEPENDING ON FITNESS FUNCT USED
         offspring[i] = copy.deepcopy(newind)
     return offspring
 
@@ -133,7 +132,14 @@ def utility(population, offspring):
     
     return newPopulation
 
-def run(population, mut, step):
+def population_fitness(population):
+    pop_fitness = []
+    for ind in population:
+        pop_fitness.append(ind.fitness)
+    meanFitness = (sum(pop_fitness) / P)
+    return pop_fitness, meanFitness
+    
+def run(population):
     plotPopulationMean = []
     plotBest = []
 
@@ -141,64 +147,65 @@ def run(population, mut, step):
 
         offspring = selection(population)
         off_combined = recombination(offspring)
-        off_mutation = mutation(off_combined, mut, step)
+        off_mutation = mutation(off_combined)
         off_mutation = copy.deepcopy(ackleys_fitness_function(off_mutation))
         population = utility(population, off_mutation)
         
         offspring.clear()
 
-        pop_fitness = [ind.fitness for ind in population]
+        pop_fitness, meanFitness = copy.deepcopy(population_fitness(population))
         minFitness = min(pop_fitness)
-        meanFitness = (sum(pop_fitness) / P)
-
+        
         plotBest.append(minFitness)
         plotPopulationMean.append(meanFitness)
     
     return plotBest, plotPopulationMean
 
-#? -------------------- TABLE PLOT --------------------
+# #? -------------------- TABLE PLOT --------------------
 
-table_range = [
-    # [0.0075, 0.0085, 0.009, 0.01, 0.015, 0.025],
-    [0.035],
-    [1, 2, 3, 4, 5, 6, 7, 8, 9]
-]
+# table_range = [
+#     # [0.0075, 0.0085, 0.009, 0.01, 0.015, 0.025],
+#     [0.035],
+#     [1, 2, 3, 4, 5, 6, 7, 8, 9]
+# ]
 
-for mut in range(0, len(table_range[0])):
-    print("!! ------------- MUT CHANGE ------------- !!\n")
-    for step in range(0, len(table_range[1])):
+# for mut in range(0, len(table_range[0])):
+#     print("!! ------------- MUT CHANGE ------------- !!\n")
+#     for step in range(0, len(table_range[1])):
         
-        #? indent to here to generate table
-        iteration_average = []
+#         #? indent to here to generate table
+#         iteration_average = []
 
-        for i in range(5):
+#         for i in range(5):
 
-            popBest, popMean = run(seed_pop(), table_range[0][mut], table_range[1][step])
-            print(f"{popBest[-6:]}")
+#             popBest, popMean = run(seed_pop(), table_range[0][mut], table_range[1][step])
+#             print(f"{popBest[-6:]}")
 
-            iteration_average.append(popBest[-1])
+#             iteration_average.append(popBest[-1])
             
-        _5_iteration_best_ind_average = statistics.mean(iteration_average)
-        iteration_average.clear()
+#         _5_iteration_best_ind_average = statistics.mean(iteration_average)
+#         iteration_average.clear()
 
-        print("RUN USING: \t|MUT: {0} \t|STEP: {1}".format(table_range[0][mut], table_range[1][step]))
-        print(f"5 RUN AVERAGE: {_5_iteration_best_ind_average}\n")
+#         print("RUN USING: \t|MUT: {0} \t|STEP: {1}".format(table_range[0][mut], table_range[1][step]))
+#         print(f"5 RUN AVERAGE: {_5_iteration_best_ind_average}\n")
 
 
 #? -------------------- AVERAGE RUN WITH PLOTS --------------------
-# _5_iterations_best_plot = [] 
-# _5_iteration_popMean_plot = []
-# iteration_average = []
-# for i in range(5):
-#     popBest, popMean = run(seed_pop())
+_5_iterations_best_plot = [] 
+_5_iteration_popMean_plot = []
+iteration_average = []
+for i in range(5):
+    # popBest, popMean = run(seed_pop(), MUTATION, STEP)
+    popBest, popMean = run(seed_pop())
 
-#     _5_iterations_best_plot.append(popBest)
-#     _5_iteration_popMean_plot.append(popMean)
-#     iteration_average.append(popBest[-1])
+    _5_iterations_best_plot.append(popBest)
+    _5_iteration_popMean_plot.append(popMean)
+    iteration_average.append(popBest[-1])
 
-#     print(f"{popBest[-6:]}")
+    print(f"{popBest[-6:]}")
 
-# _5_iteration_best_ind_average = statistics.mean(iteration_average)
+_5_iteration_best_ind_average = statistics.mean(iteration_average)
+print(f"AVERAGE : {_5_iteration_best_ind_average}")
 
 # #? Works out best mean from all 5 runs to plot against
 # # plots against the best mean returned from 5 runs 
@@ -206,19 +213,20 @@ for mut in range(0, len(table_range[0])):
 # # beast_popMean  = min(popMean_sum)
 # # _10_iteration_lowest_popMean_index = popMean_sum.index(beast_popMean)
 
-# print(f"AVERAGE : {_5_iteration_best_ind_average}")
 
-# plt.title("Akleys")
-# plt.xlabel('Generations')
-# plt.ylabel('Fitness')
+
+plt.title("Akleys")
+plt.xlabel('Generations')
+plt.ylabel('Fitness')
 # plt.plot(popMean, label = "popAverage")
-# plt.plot(_5_iterations_best_plot[0], label = "bestIndividual_r1")
-# plt.plot(_5_iterations_best_plot[1], label = "bestIndividual_r2")
-# plt.plot(_5_iterations_best_plot[2], label = "bestIndividual_r3")
-# plt.plot(_5_iterations_best_plot[3], label = "bestIndividual_r4")
-# plt.plot(_5_iterations_best_plot[4], label = "bestIndividual_r5")
-# plt.legend(loc="upper right")
-# plt.show()
+plt.title("Akleys Mut:0.0025 & Step: 5.5")
+plt.plot(_5_iterations_best_plot[0], label = "bestIndividual_r1")
+plt.plot(_5_iterations_best_plot[1], label = "bestIndividual_r2")
+plt.plot(_5_iterations_best_plot[2], label = "bestIndividual_r3")
+plt.plot(_5_iterations_best_plot[3], label = "bestIndividual_r4")
+plt.plot(_5_iterations_best_plot[4], label = "bestIndividual_r5")
+plt.legend(loc="upper right")
+plt.show()
 
 
 #? -------------------- AVERAGE RUN WITH PLOTS --------------------
