@@ -14,17 +14,17 @@ class individual:
     def __str__ (self):
         return f"Genes:\n{self.gene}\nFitness: {self.fitness}\t| RelativeFitness: {self.relativeFitness}\n"
 
-P = 200
+P = 600
 N = 20
-G = 50
+G = 450
 GMIN = -32
 GMAX = 32
 
 # STEP = 1 #best
 # MUTATION = 0.03 #best
 
-MUTATION = 
-STEP = 
+# MUTATION = 0.03
+# STEP = 3
 
 
 # --------- FITNESS FUNCTIONS
@@ -171,8 +171,9 @@ def run_gau_arithmetic(population, mut, step):
 _5_iterations_best_plot = [] 
 _5_iteration_popMean_plot = []
 iteration_average = []
+
 for i in range(5):
-    popBest, popMean = run_gau_arithmetic(seed_pop(), MUTATION, STEP)
+    popBest, popMean = run_gau_arithmetic(seed_pop(), 0.03, 1)
 
     _5_iterations_best_plot.append(popBest)
     _5_iteration_popMean_plot.append(popMean)
@@ -189,9 +190,10 @@ _10_iteration_lowest_popMean_index = popMean_sum.index(beast_popMean)
 
 print(f"AVERAGE : {_5_iteration_best_ind_average}")
 
-plt.title("Akleys Mut: & Step: ")
+plt.title("Akleys Mut: 0.03 & Step: 1 & Pop: 600")
 plt.xlabel('Generations')
 plt.ylabel('Fitness')
+plt.text(150, -15,"Average: {0}".format(_5_iteration_best_ind_average), color="b")
 # plt.plot(popMean, label = "popAverage")
 plt.plot(_5_iterations_best_plot[0], label = "bestIndividual_r1")
 plt.plot(_5_iterations_best_plot[1], label = "bestIndividual_r2")
