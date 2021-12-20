@@ -182,10 +182,9 @@ def run(population, mut, step):
     return plotBest, plotPopulationMean
 
 #! calculating best solution 
-# best = [0 for i in range(20)]
+best = [0 for i in range(20)]
 # best2 = [1 for i in range(20)]
-# print(len(best))
-# print("Akle: {0}".format(ackleys_fitness_seeding(best)))
+print("Akle: {0}".format(ackleys_fitness_seeding(best)))
 
     #? ---------- Plot ----------
 
